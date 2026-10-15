@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#080610">
+    <link rel="apple-touch-icon" href="assets/images/logic_code_cover.jpg">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><circle cx=%2216%22 cy=%2216%22 r=%2211%22 fill=%22%23ab80ff%22/></svg>">
+    <link rel="stylesheet" href="css/style.css?v=hint-toggle-playtest-v1">
+    <link rel="stylesheet" href="css/character.css?v=walk-v14-integration-1">
+    <title>LOGIC CODE — CHAPTER II — FUGATA〈賦〉</title>
+  </head>
+  <body>
+    <main class="shell">
+      <aside id="local-test-room-selector" class="local-test-room-selector" hidden>
+        <p>本機測試模式</p>
+        <label for="local-test-room">直接前往關卡</label>
+        <div>
+          <select id="local-test-room" aria-label="選擇測試關卡">
+            <option value="1">第一室｜找到旋律的種子｜樂句的主題</option>
+            <option value="2">第二室｜聽見另一個聲部接話｜主題的回應</option>
+            <option value="3">第三室｜讓聲音活起來｜組建模組合成器</option>
+            <option value="4">第四室｜讓四個聲部交織｜聲部的編織</option>
+            <option value="5">第五室｜讓九拍向前奔跑｜節奏驅動！</option>
+            <option value="6">第六室｜讓最初的旋律回來｜樂句的回歸</option>
+          </select>
+          <button id="local-test-room-go" type="button">前往</button>
+        </div>
+        <small>僅限本機網址測試，不影響正式流程。</small>
+      </aside>
+      <section id="title-screen" class="title-screen" aria-labelledby="game-title">
+        <div class="title-scene" aria-hidden="true"></div>
+        <div class="title-interface">
+          <header class="title-rail">
+            <p class="series">LOGIC CODE</p>
+            <p>音樂密室逃脫・第二篇章</p>
+          </header>
+
+          <div class="title-lockup">
+            <p class="chapter-label"><span>CHAPTER</span><b>II</b></p>
+            <h1 id="game-title"><span>FUGATA</span><em>〈賦〉</em></h1>
+            <p class="title-subtitle">讓失落的樂句，再次完整發聲</p>
+          </div>
+
+          <div class="motif-mark" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span><span></span>
+          </div>
+
+          <div class="title-console">
+            <div class="title-briefing">
+              <span>進入前提示</span>
+              <p class="instruction">先聽一段，記住最初出現的樂句主題。</p>
+              <p id="title-audio-status" class="load-status" aria-live="polite">完整歌曲：載入中……</p>
+            </div>
+            <div class="title-controls">
+              <button id="play-fugata" type="button"><span aria-hidden="true">▶</span> 試聽 FUGATA</button>
+              <button id="toggle-fugata" type="button" disabled>暫停</button>
+              <button id="start-game" type="button" class="primary">進入觀測室 <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+          <p id="title-error" class="error-text" role="alert"></p>
+        </div>
+      </section>
+
+      <section id="character-screen" hidden aria-label="角色創造"></section>
+
+      <section id="game-screen" class="game-screen" hidden aria-label="Fugata 音樂密室逃脫遊戲">
+        <header class="game-header">
+          <div>
+            <p>LOGIC CODE / FUGATA</p>
+            <h2 id="room-title">第一室｜找到旋律的種子<br>樂句的主題</h2>
+          </div>
+          <p id="door-number" class="door-number">01 / 06</p>
+        </header>
+        <div class="character-tools">
+          <output id="character-art-notice"></output>
+          <output id="save-status" role="status"></output>
+          <button id="edit-character" type="button">修改角色</button>
+          <button id="toggle-fullscreen" type="button" aria-pressed="false" title="切換全螢幕（F）">全螢幕</button>
+        </div>
+          <div id="room04-transport" class="room-transport" hidden aria-label="聲部參考混音控制">
+          <span>參考混音：<strong id="room04-playback-status">尚未播放</strong></span>
+          <button id="room04-toggle" type="button">播放參考混音</button>
+          <button id="room04-replay" type="button">從頭重播</button>
+        </div>
+          <div id="room03-hud" class="room03-hud" hidden aria-live="polite">
+            <section class="room03-room-card" aria-label="Room 3 關卡名稱">
+              <strong>Room 3</strong>
+              <span>讓聲音活起來</span>
+              <span>組建模組合成器</span>
+              <i aria-hidden="true"></i>
+            </section>
+            <section class="room03-objective" aria-label="Room 3 目前目標">
+              <small>◆ 目前目標</small>
+              <strong id="room03-objective-copy">先找到振盪器，聆聽原始鋸齒波。</strong>
+              <span id="room03-device-copy">靠近器材後可查看功能與訊號類型。</span>
+            </section>
+            <section class="room03-step-card" aria-label="Room 3 接線進度">
+              <span>已完成 <strong id="room03-step-count">0／6</strong></span>
+              <i id="room03-step-pips" aria-hidden="true">
+                <b></b><b></b><b></b><b></b><b></b><b></b>
+              </i>
+            </section>
+          </div>
+      <div class="canvas-frame">
+  
+        <canvas id="game-canvas" width="960" height="640" tabindex="0" aria-label="第一室｜找到旋律的種子｜樂句的主題">
+            需要支援網頁畫布技術才能遊玩 Fugata 音樂密室逃脫。
+          </canvas>
+          <div id="room01-hud" class="room01-hud" hidden aria-live="polite">
+            <section class="room01-room-card" aria-label="Room 1 關卡名稱">
+              <strong>Room 1</strong>
+              <span>找到旋律的種子</span>
+              <span>樂句的主題</span>
+              <i aria-hidden="true"></i>
+            </section>
+            <section class="room01-objective" aria-label="Room 1 目前目標">
+              <small>◆ 目前目標</small>
+              <strong id="room01-objective-copy">聆聽五段旋律，找出樂句主題。</strong>
+            </section>
+            <section class="room01-carry-card" aria-label="Room 1 攜帶狀態">
+              <small>星核狀態</small>
+              <strong id="room01-carry-copy">未攜帶</strong>
+            </section>
+            <section class="room01-controls" aria-label="Room 1 操作提示">
+              <span><b>E</b> 聆聽／提交</span>
+              <span><b>Enter</b> 拿取／交換／放回</span>
+            </section>
+          </div>
+
+          <div id="room-completion-marker" class="room-completion-marker" hidden aria-live="polite">
+            <small></small>
+            <strong></strong>
+          </div>
+        </div>
+        <aside id="door03-patch-guide" class="patch-guide" hidden aria-labelledby="patch-guide-title">
+          <div class="patch-guide-heading">
+            <div>
+              <p>Room 3／模組合成器</p>
+              <h3 id="patch-guide-title">接線指引 <span>／接線順序</span></h3>
+            </div>
+            <button
+              id="patch-guide-toggle"
+              type="button"
+              aria-expanded="true"
+              aria-controls="patch-guide-details"
+            >隱藏接線指引</button>
+          </div>
+
+          <p class="patch-guide-intro">
+            建立訊號路徑，一次接上一條線，聽聲音逐步成形。<br>
+            <span>音訊、音高控制、觸發與包絡控制，各自負責不同的工作。</span>
+          </p>
+
+          <section class="patch-guide-current" aria-live="polite">
+            <p id="patch-guide-step-label">步驟 0／6</p>
+            <strong id="patch-guide-step-copy">先找到振盪器，聆聽原始鋸齒波。</strong>
+          </section>
+
+          <div id="patch-guide-details" class="patch-guide-details">
+            <ol class="patch-guide-list" aria-label="六步接線順序">
+              <li data-edge-id="sequencer-pitch-to-vco" data-signal="pitch-cv">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>1.</b> 音序器「音高控制輸出」<i>→</i> 振盪器「音高輸入」</span>
+                <small>音高控制電壓</small>
+              </li>
+              <li data-edge-id="vco-audio-to-filter" data-signal="audio">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>2.</b> 振盪器「音訊輸出」<i>→</i> 濾波器「音訊輸入」</span>
+                <small>音訊訊號</small>
+              </li>
+              <li data-edge-id="filter-audio-to-effect" data-signal="audio">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>3.</b> 濾波器「音訊輸出」<i>→</i> 效果器「音訊輸入」</span>
+                <small>音訊訊號</small>
+              </li>
+              <li data-edge-id="effect-audio-to-vca" data-signal="audio">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>4.</b> 效果器「音訊輸出」<i>→</i> 電壓控制放大器「音訊輸入」</span>
+                <small>音訊訊號</small>
+              </li>
+              <li data-edge-id="sequencer-gate-to-envelope" data-signal="gate">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>5.</b> 音序器「觸發訊號輸出」<i>→</i> 包絡產生器「觸發輸入」</span>
+                <small>觸發訊號</small>
+              </li>
+              <li data-edge-id="envelope-cv-to-vca" data-signal="envelope-cv">
+                <span class="patch-guide-state" aria-hidden="true">·</span>
+                <span><b>6.</b> 包絡產生器「控制電壓輸出」<i>→</i> 電壓控制放大器「音量控制輸入」</span>
+                <small>包絡控制電壓</small>
+              </li>
+            </ol>
+
+            <div class="patch-guide-paths" aria-label="訊號路徑摘要">
+              <p><b>音訊路徑</b><span>振盪器 → 濾波器 → 效果器 → 電壓控制放大器 → 輸出</span></p>
+              <p><b>音高控制</b><span>音序器音高控制電壓 → 振盪器音高輸入</span></p>
+              <p><b>觸發與包絡控制</b><span>音序器觸發訊號 → 包絡產生器 → 放大器音量控制</span></p>
+            </div>
+          </div>
+        </aside>
+        <aside id="room-progress-panel" class="room-progress-panel" hidden aria-live="polite">
+          <p data-progress-eyebrow></p>
+          <h3 data-progress-title></h3>
+          <p data-progress-copy></p>
+          <ol data-progress-steps></ol>
+        </aside>
+        <div class="game-status-bar" aria-label="遊戲進度">
+          <span><small>目前房間</small><strong id="status-room">第一室／共六室</strong></span>
+          <span><small>已完成</small><strong id="status-doors">0／6</strong></span>
+          <span><small>攜帶中</small><strong id="status-carrying">無</strong></span>
+          <span id="status-door" class="door-status">第一室：鎖定</span>
+        </div>
+        <div class="transient-status" aria-live="polite">
+          <p id="audio-notice" class="audio-notice" hidden></p>
+          <p id="gameplay-feedback" class="gameplay-feedback" hidden></p>
+          <p id="room-controls-summary" class="room-controls-summary" hidden></p>
+        </div>
+        <footer class="controls-bar">
+          <span>WASD / 方向鍵 <b>移動</b></span>
+          <span><b>靠近或選取裝置</b>查看目前可用操作</span>
+        </footer>
+        <div id="room-transition-overlay" class="room-transition-overlay" hidden aria-hidden="true">
+          <div>
+            <p data-transition-eyebrow></p>
+            <h3 data-transition-title></h3>
+          </div>
+        </div>
+      </section>
+
+      <section id="chapter-complete" class="chapter-complete" hidden aria-labelledby="ending-title">
+        <div class="ending-core" aria-hidden="true">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="ending-layout">
+          <div class="ending-cover-column">
+            <div class="cover-frame">
+              <img
+                id="ending-cover"
+                src="assets/art/fugata/screens/ending-mushroom-observatory-v1.png"
+                alt="香菇旅人與兔子抵達 Fugata 星象觀測室"
+              >
+              <div class="ending-scene-status" aria-hidden="true">
+                <span>RECONSTRUCTION</span>
+                <strong>06 / 06</strong>
+              </div>
+              <div id="ending-cover-fallback" class="cover-fallback" hidden>
+                <strong>LOGIC CODE</strong>
+                <span>第二篇章</span>
+                <em>FUGATA</em>
+              </div>
+            </div>
+            <div class="album-panel">
+              <p class="ending-kicker">LOGIC CODE</p>
+              <h3>重構紀錄／FUGATA〈賦〉</h3>
+              <dl>
+                <div><dt>模組合成器</dt><dd>Miss DJ Bear Beat</dd></div>
+                <div><dt>鼓組／節奏</dt><dd>Leroy</dd></div>
+              </dl>
+              <p>一段從樂句主題出發，逐步展開為多聲部結構的模組合成與鼓樂作品。</p>
+              <nav id="album-links" class="album-links" aria-label="作品連結" hidden></nav>
+            </div>
+          </div>
+
+          <div class="ending-content">
+            <p class="ending-kicker">LOGIC CODE</p>
+            <h2 id="ending-title" tabindex="-1"><span>CHAPTER II</span><em>FUGATA〈賦〉</em></h2>
+            <p class="ending-complete">帶著一切回到起點<br>完美重建！</p>
+            <p class="ending-copy">
+              樂句主題、主題答句、聲部、合成器接線與節奏，<br>
+              都帶著一路累積的變化回到了起點。<br>
+              《Fugata》重構完成。
+            </p>
+            <div class="ending-dialogue" aria-label="章節完成對話">
+              <p><b>Leroy</b><span>我原本以為回到開頭，<br>就代表一切重來。</span></p>
+              <p><b>Miss DJ Bear Beat</b><span>音樂不是回到原點。<br>它只是讓你再次聽見<br>同一個地方有多不一樣。</span></p>
+              <p><b>Leroy</b><span>樂句主題繞了一大圈，<br>把我們一路聽過的東西<br>全都帶了回來。</span></p>
+              <p><b>Miss DJ Bear Beat</b><span>這一章完成了。<br>但脈衝還在前進。</span></p>
+            </div>
+
+            <div class="ending-player" aria-label="Fugata 播放器">
+              <div class="player-heading">
+                <strong>FUGATA — 完整歌曲</strong>
+                <span id="ending-playback-status" aria-live="polite">已暫停</span>
+              </div>
+              <div class="player-time">
+                <span id="ending-current-time">0:00</span>
+                <input id="ending-progress" type="range" min="0" max="1000" value="0" aria-label="播放進度">
+                <span id="ending-duration">0:00</span>
+              </div>
+              <div class="player-controls">
+                <button id="ending-play-toggle" type="button">播放</button>
+                <label>音量
+                  <input id="ending-volume" type="range" min="0" max="1" step="0.01" value="0.72">
+                </label>
+              </div>
+              <button id="ending-autoplay" class="autoplay-fallback" type="button" hidden>
+                點擊播放《Fugata》
+              </button>
+            </div>
+
+            <div class="ending-actions">
+              <button id="restart-chapter" type="button" class="primary">
+                重新開始《Fugata》
+              </button>
+              <button id="next-chapter" type="button">
+                前往第三篇章<span>BREAK OF DAWN</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div id="coming-soon" class="coming-soon" role="dialog" aria-modal="true" aria-labelledby="coming-soon-title" hidden>
+          <div>
+            <p>LOGIC CODE</p>
+            <h3 id="coming-soon-title">第三篇章 — BREAK OF DAWN</h3>
+            <p>敬請期待</p>
+            <button id="close-coming-soon" type="button">返回章節完成畫面</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <audio id="fugata-full-track" preload="metadata" src="assets/audio/fugata/fugata_full.mp3"></audio>
+    <script type="module" src="js/main.js?v=hint-toggle-playtest-v1"></script>
+  </body>
+</html>

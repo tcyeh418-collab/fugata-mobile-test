@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#080b0f">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Fugata Room 1">
+    <link rel="manifest" href="room1.webmanifest">
+    <title>Fugata Mobile｜Room 1</title>
+  </head>
+  <body>
+    <p>正在開啟 Room 1 手機垂直切片……</p>
+    <script>
+      const target = new URL("../index.html", location.href);
+      target.searchParams.set("mobile", "room1");
+      location.replace(target.href);
+    </script>
+  </body>
+</html>
