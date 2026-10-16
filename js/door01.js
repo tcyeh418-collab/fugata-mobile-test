@@ -33,12 +33,14 @@ export function isNearThemeReplayDevice(state) {
   );
 }
 
-export function handleEnter(state) {
+export function handleEnter(state, options = {}) {
   if (state.dialogue.active) {
     advanceDialogue(state);
     return true;
   }
-  if (isNearDoor(state)) return false;
+  if (isNearDoor(state)) {
+    return options.submitAtDoor ? submitAtDoor(state) : false;
+  }
   const fragment = nearestPedestal(state);
   if (!fragment) return false;
 
@@ -59,7 +61,7 @@ export function handleEnter(state) {
   return true;
 }
 
-export function handleListenOrSubmit(state, audio) {
+export function handleListenOrSubmit(state, audio, options = {}) {
   if (state.dialogue.active) return false;
   if (isNearThemeReplayDevice(state)) return toggleThemeReplay(state, audio);
   if (state.room01ThemeReplay.playing) {
@@ -71,7 +73,27 @@ export function handleListenOrSubmit(state, audio) {
     );
     return true;
   }
-  if (isNearDoor(state)) return submitAtDoor(state);
+  const nearDoor = isNearDoor(state);
+  if (nearDoor && !options.listenAtDoor) return submitAtDoor(state);
+
+  // The mobile control scheme keeps the carried fragment in the player's
+  // hand instead of leaving a separately selectable object on the floor.
+  // Let that explicit mobile-only mode replay the carried fragment so a
+  // player can still compare it after taking it.  Desktop/web callers omit
+  // the option and preserve the original behaviour.
+  const carried = heldFragment(state);
+  if (options.allowHeldPreview && carried) {
+    const played = audio.playFragment(carried.audioKey, carried.id);
+    if (played) setMessage(state, [`攜帶中的「${carried.displayLabel}」播放中……`], 1.7, "preview");
+    else if (state.audio.fragmentAssetsStatus !== "Ready") {
+      setMessage(state, ["旋律片段音訊仍在載入。"], 1.5, "audio");
+    }
+    return true;
+  }
+  if (nearDoor && options.listenAtDoor) {
+    setMessage(state, ["目前沒有攜帶可聆聽的旋律片段。"], 1.8, "audio");
+    return true;
+  }
 
   const fragment = nearestPedestal(state);
   if (!fragment || fragment.isHeld) return false;

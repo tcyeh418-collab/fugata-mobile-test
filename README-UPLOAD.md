@@ -1,43 +1,38 @@
-# Fugata Room 1 手機版 v2｜手動上傳說明
+# Fugata Room 1–5 手機測試站
 
-這是 Room 1 手機操作介面的獨立測試包，不是正式 release，也不包含 Room 2–6 的完整圖片與音訊素材。
+這是 2026-10-16 的 Room 1–5 手機操作測試版本，不是正式 release。
 
-## 上傳方式
+## 測試入口
 
-1. 解壓 ZIP。
-2. 將解壓後的 **全部內容** 上傳到同一個網站目錄；請保留 `index.html`、`mobile/`、`css/`、`js/`、`assets/`、`outputs/` 的相對目錄結構。
-3. 手機入口格式：`https://你的網域/你的目錄/mobile/index.html?mobile=room1`
-4. 網站必須透過 HTTP 或 HTTPS 提供，不能直接以 `file://` 開啟。建議使用 HTTPS，Fullscreen、Web App 與加入主畫面的相容性較完整。
+`https://tcyeh418-collab.github.io/fugata-mobile-test/mobile/index.html?mobile=room1`
 
-伺服器必須正確提供以下 MIME types：
+請透過 HTTPS 開啟，不要使用 `file://`。角色建立採直式操作，確認進入 Room 1 後再轉成橫式遊玩。
 
-- HTML：`text/html`
-- JavaScript：`text/javascript` 或 `application/javascript`
-- CSS：`text/css`
-- JSON：`application/json`
-- Web App Manifest：`application/manifest+json`
-- WOFF2：`font/woff2`
-- PNG：`image/png`
-- JPEG：`image/jpeg`
-- MP3：`audio/mpeg`
+## 手機操作
 
-## 手機提示
+- 左側按住並拖曳：動態虛擬搖桿。
+- 右側菱形按鈕：依目前關卡與互動位置顯示聆聽、確認、測試及取消等動作。
+- iPhone Safari：建議加入主畫面後測試橫式與 safe area。
+- Android Chrome：可使用「全螢幕遊玩」。
 
-- iPhone Safari：建議先選擇「加入主畫面」，再以橫式遊玩。
-- Android Chrome：可在遊戲 HUD 點擊「全螢幕遊玩」，並測試進入與退出。
-- 更新測試包後若仍看到舊版，請清除該網站的快取／網站資料，或上傳到新的目錄名稱再開啟。
+## 測試範圍
 
-這份包的自動驗證使用 Chromium 模擬 viewport 與 Pointer Events；**這不是真機測試結果**。
+請由標題畫面與角色建立正常進入遊戲，依序測試 Room 1–5。Room 6 尚未納入這一輪手機介面驗收。
 
-## 真機手動檢查清單
+真機請特別確認：
 
-1. iPhone Safari 快速點擊場景不會誤觸搖桿。
-2. iPhone 加入主畫面後 safe area 正常。
-3. Android Chrome 可以進入及退出全螢幕。
-4. 左手持續移動時，右手四個按鈕都能操作。
-5. 放開搖桿後角色立即停止。
-6. 對話開啟時控制器不遮住正文。
-7. 瀏海、Dynamic Island 與 Home Indicator 不遮住 HUD 或按鈕。
-8. 旋轉回直式時會顯示橫式提示。
+1. 快速點擊場景不會誤觸搖桿。
+2. 左手持續移動時，右手按鈕仍可操作。
+3. 放開搖桿後角色立即停止。
+4. Room 1 拿取素材後仍能聽到片段。
+5. Room 4 聲部播放與排列操作正常。
+6. Room 5 三段節奏、測試及最終啟動音訊正常。
+7. 對話不被控制器遮住。
+8. 瀏海、Dynamic Island 與 Home Indicator 不遮住 HUD 或按鈕。
+9. 旋轉回直式會顯示橫式提示。
 
-封裝識別：`fugata-room1-mobile-v2-playtest-2026-10-14-3`
+Chromium 自動化結果不等同於 iPhone 或 Android 真機測試。
+
+## 快取
+
+GitHub Pages 與 Safari 可能短暫保留舊檔。若仍看到舊版，請等待數分鐘後重新整理；必要時清除該網站資料或以無痕視窗開啟。

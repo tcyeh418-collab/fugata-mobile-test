@@ -12,9 +12,10 @@ import {
   updateDoor03,
 } from "./door03.js";
 import {
-  cancelDoor04Carry, controlDoor04Reference, nearDoor04Reference,
+  cancelDoor04Carry, controlDoor04Reference, nearDoor04Reference, nearDoor04Test,
   handleDoor04Enter,
   handleDoor04ListenOrTest,
+  stopDoor04Sequence,
   updateDoor04,
 } from "./door04.js?v=room04-movement-fixes-v6";
 import {
@@ -37,7 +38,7 @@ import { maybeStartRoomTransition, updateRoomTransition } from "./room-transitio
 import { updateInteractionHint, updateTransientUi } from "./ui.js?v=room01-theme-replay-v1";
 import { ROOM04_CHARACTER_SPOTS } from "./room04-layout.js?v=room04-movement-fixes-v6";
 
-export function updateGame(state, input, audio, deltaTime) {
+export function updateGame(state, input, audio, deltaTime, options = {}) {
   state.elapsedTime += deltaTime;
   if (state.phase !== "game") return;
   if (state.tutorialOpen){input.reset();return;}
@@ -51,8 +52,13 @@ export function updateGame(state, input, audio, deltaTime) {
   if(action&&!validAction)setMessage(state,['請靠近','沿走道靠近已選取的裝置，再執行操作。'],2.5,'interaction');
   if(validAction)state.interaction.selectedId=target.id;
   state.interaction.executingId=state.interaction.selectedId;
-  const enterRequested = input.consumeEnter() || (validAction && action.code==='Enter');
-  const listenRequested = input.consumeListen() || (validAction && action.code==='KeyE');
+  const mobileDoorSubmitAction = options.mobileRoom1 === true
+    && state.gameProgress.currentRoom === 1
+    && validAction
+    && target?.id === state.door01.id
+    && action.code === 'KeyE';
+  const enterRequested = input.consumeEnter() || (validAction && action.code==='Enter') || mobileDoorSubmitAction;
+  const listenRequested = input.consumeListen() || (validAction && action.code==='KeyE' && !mobileDoorSubmitAction);
   const spaceRequested = input.consumeSpace() || (validAction && action.code==='Space');
   const cancelRequested = input.consumeCancel();
   let interactionPerformed = false;
@@ -72,8 +78,17 @@ export function updateGame(state, input, audio, deltaTime) {
       advanceDialogue(state);
     }
   } else if (state.gameProgress.currentRoom === 1) {
-    if (enterRequested) interactionPerformed = handleEnter(state);
-    if (listenRequested && !enterRequested) interactionPerformed = handleListenOrSubmit(state, audio);
+    if (enterRequested) {
+      interactionPerformed = handleEnter(state, {
+        submitAtDoor: options.mobileRoom1 === true,
+      });
+    }
+    if (listenRequested && !enterRequested) {
+      interactionPerformed = handleListenOrSubmit(state, audio, {
+        allowHeldPreview: options.mobileRoom1 === true,
+        listenAtDoor: options.mobileRoom1 === true,
+      });
+    }
   } else if (state.gameProgress.currentRoom === 2) {
     if (enterRequested) interactionPerformed = handleDoor02Enter(state);
     if (listenRequested && !enterRequested) interactionPerformed = handleDoor02Listen(state, audio);
@@ -83,7 +98,13 @@ export function updateGame(state, input, audio, deltaTime) {
     else if (listenRequested) interactionPerformed = handleDoor03Inspect(state, audio);
   } else if (state.gameProgress.currentRoom === 4) {
     if (cancelRequested) interactionPerformed = cancelDoor04Carry(state);
-    else if (enterRequested) interactionPerformed = handleDoor04Enter(state);
+    else if (options.mobileRoom1 === true && spaceRequested
+      && ["preparing", "testing"].includes(state.door04.status)) {
+      stopDoor04Sequence(state, audio);
+      interactionPerformed = true;
+    } else if (options.mobileRoom1 === true && spaceRequested && nearDoor04Test(state)) {
+      interactionPerformed = handleDoor04ListenOrTest(state, audio);
+    } else if (enterRequested) interactionPerformed = handleDoor04Enter(state);
     else if (spaceRequested && nearDoor04Reference(state)) interactionPerformed = controlDoor04Reference(state, audio, true);
     else if (listenRequested) {
       interactionPerformed = handleDoor04ListenOrTest(state, audio);

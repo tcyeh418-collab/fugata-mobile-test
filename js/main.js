@@ -74,10 +74,10 @@ if (mobileRoom1Enabled) {
   if (viewport) viewport.content = "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no";
   const mobileStyles = document.createElement("link");
   mobileStyles.rel = "stylesheet";
-  mobileStyles.href = "mobile/room1.css?v=2";
+  mobileStyles.href = "mobile/room1.css?v=8";
   document.head.append(mobileStyles);
 }
-const localTestEnabled = false; // Room 1 upload package: no local QA backdoor.
+const localTestEnabled = false; // Public playtest package: no local QA routes.
 const autoTestRoom = null;
 const autoEndingPreview = false;
 const autoRoom03GateState = null;
@@ -127,11 +127,9 @@ if (!(canvas instanceof HTMLCanvasElement) || !(fullTrack instanceof HTMLAudioEl
 let storage;
 try { storage = window.localStorage; } catch { storage = {getItem:()=>null,setItem:()=>{throw new Error("Storage unavailable");},removeItem:()=>{}}; }
 const saveCheckEnabled=localTestEnabled && new URLSearchParams(location.search).get('savecheck')==='1';
-if (saveCheckEnabled) storage=isolatedSessionStorage(window.sessionStorage);
-else if (localTestEnabled) storage = isolatedStorage(storage, freshLocalTestStorage);
 const releaseLabel = document.createElement('p');
 releaseLabel.id = 'release-label';
-releaseLabel.textContent = `Room 1 手機測試包｜正常遊玩：保存角色與進度`;
+releaseLabel.textContent = 'Room 1–5 手機測試版｜正常遊玩：保存角色與進度';
 const hubLink = document.createElement('a'); hubLink.href = 'test.html'; hubLink.textContent = '返回統一測試首頁';
 releaseLabel.append(' · ', hubLink);
 if (localTestingAvailable) document.body.prepend(releaseLabel);
@@ -203,6 +201,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)persistProg
 const renderer = createRenderer(canvas, {
   reducedMotion: reducedMotionEnabled,
   externalRoom01Ui: mobileRoom1Enabled,
+  externalRoomUiRooms: mobileRoom1Enabled ? [1, 2, 3, 4, 5] : [],
 });
 const audio = createAudioSystem(fullTrack, {
   onFullTrackState(next) {
@@ -483,7 +482,7 @@ const fullscreenTools=createFullscreenTools({
 });
 let mobileRoom1Ui = null;
 if (mobileRoom1Enabled) {
-  import("../mobile/room1-ui.js?v=2").then(({ installMobileRoom1Ui }) => {
+  import("../mobile/room1-ui.js?v=8").then(({ installMobileRoom1Ui }) => {
     mobileRoom1Ui = installMobileRoom1Ui({
       canvas,
       gameScreen,
@@ -499,7 +498,7 @@ function frame(now) {
   const deltaTime = Math.min((now - previousTime) / 1000, 0.05);
   state.door05.rafIntervalMs = now - previousTime;
   previousTime = now;
-  updateGame(state, input, audio, deltaTime);
+  updateGame(state, input, audio, deltaTime, { mobileRoom1: mobileRoom1Enabled });
   if (state.phase === "game") {
     renderer.render(state);
     gameUi.render(state);

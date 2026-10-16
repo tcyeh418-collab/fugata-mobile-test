@@ -14,17 +14,44 @@
 html.mobile-room1,
 html.mobile-room1 body {
   width: 100%;
-  height: 100%;
   min-width: 100%;
   min-height: 100%;
   margin: 0;
-  overflow: hidden;
   overflow-x: hidden;
-  overscroll-behavior: none;
   background: #05070d;
 }
 
-html.mobile-room1 body {
+html.mobile-room1:not(.mobile-room1-playing),
+html.mobile-room1:not(.mobile-room1-playing) body {
+  height: auto;
+  min-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: auto;
+}
+
+html.mobile-room1:not(.mobile-room1-playing) body {
+  position: static;
+  display: block;
+  min-height: 100dvh;
+  padding: var(--mobile-room1-safe-top) var(--mobile-room1-safe-right)
+    var(--mobile-room1-safe-bottom) var(--mobile-room1-safe-left);
+}
+
+html.mobile-room1:not(.mobile-room1-playing) .shell {
+  height: auto;
+  min-height: 100dvh;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+html.mobile-room1.mobile-room1-playing,
+html.mobile-room1.mobile-room1-playing body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.mobile-room1.mobile-room1-playing body {
   position: fixed;
   inset: 0;
   display: block;
@@ -32,8 +59,8 @@ html.mobile-room1 body {
     var(--mobile-room1-safe-bottom) var(--mobile-room1-safe-left);
 }
 
-html.mobile-room1 .shell,
-html.mobile-room1 #game-screen {
+html.mobile-room1.mobile-room1-playing .shell,
+html.mobile-room1.mobile-room1-playing #game-screen {
   width: 100%;
   height: 100%;
   min-width: 0;
@@ -385,6 +412,14 @@ html.mobile-room1 .interaction-panel button { display: none; }
   pointer-events: none;
 }
 
+.mobile-room1-stage[data-movement-locked="true"] .mobile-joystick-zone {
+  pointer-events: none;
+}
+
+.mobile-room1-stage[data-movement-locked="true"] .mobile-virtual-joystick {
+  opacity: 0;
+}
+
 .mobile-room1-dialogue {
   position: absolute;
   z-index: 11;
@@ -431,26 +466,61 @@ html.mobile-room1 .room-help-dialog li { margin: 6px 0; }
 html.mobile-room1 .room-help-dialog p { margin: 7px 0; }
 html.mobile-room1 .room-help-dialog button { min-height: 44px; }
 
-.mobile-rotate-notice { display: none; }
+.mobile-rotate-notice,
+.mobile-portrait-notice { display: none; }
+
+.mobile-rotate-notice,
+.mobile-portrait-notice {
+  position: fixed;
+  z-index: 9999;
+  inset: 0;
+  place-content: center;
+  gap: 8px;
+  padding: calc(24px + var(--mobile-room1-safe-top)) calc(24px + var(--mobile-room1-safe-right))
+    calc(24px + var(--mobile-room1-safe-bottom)) calc(24px + var(--mobile-room1-safe-left));
+  overflow: hidden;
+  background: #070a12;
+  color: #f1e6cb;
+  text-align: center;
+  font: 18px/1.5 FugataPixel, ui-sans-serif, system-ui, sans-serif;
+}
+
+.mobile-rotate-notice strong,
+.mobile-portrait-notice strong { color: #f0bf67; font-size: 22px; }
 
 @media (orientation: portrait) {
-  html.mobile-room1 .mobile-room1-stage { visibility: hidden; }
-  .mobile-rotate-notice {
-    position: fixed;
-    z-index: 9999;
-    inset: 0;
+  html.mobile-room1.mobile-room1-playing .mobile-room1-stage { visibility: hidden; }
+  html.mobile-room1.mobile-room1-playing .mobile-rotate-notice {
     display: grid;
-    place-content: center;
-    gap: 8px;
-    padding: calc(24px + var(--mobile-room1-safe-top)) calc(24px + var(--mobile-room1-safe-right))
-      calc(24px + var(--mobile-room1-safe-bottom)) calc(24px + var(--mobile-room1-safe-left));
-    overflow: hidden;
-    background: #070a12;
-    color: #f1e6cb;
-    text-align: center;
-    font: 18px/1.5 FugataPixel, ui-sans-serif, system-ui, sans-serif;
   }
-  .mobile-rotate-notice strong { color: #f0bf67; font-size: 22px; }
+
+  html.mobile-room1.mobile-room1-creating .shell {
+    width: min(100%, 620px);
+    padding: max(10px, var(--mobile-room1-safe-top)) max(10px, var(--mobile-room1-safe-right))
+      max(18px, var(--mobile-room1-safe-bottom)) max(10px, var(--mobile-room1-safe-left));
+  }
+
+  html.mobile-room1.mobile-room1-creating .character-creator {
+    width: 100%;
+    margin: 0 auto;
+    padding: clamp(10px, 3vw, 16px);
+  }
+
+  html.mobile-room1.mobile-room1-creating .creator-layout { grid-template-columns: minmax(0, 1fr); }
+  html.mobile-room1.mobile-room1-creating .creator-options { min-height: 0; }
+  html.mobile-room1.mobile-room1-creating .creator-stage { min-height: 240px; }
+  html.mobile-room1.mobile-room1-creating .creator-footer {
+    position: sticky;
+    z-index: 12;
+    bottom: max(6px, var(--mobile-room1-safe-bottom));
+    padding: 10px 0 4px;
+    border-top: 1px solid rgba(166, 131, 73, .7);
+    background: rgba(16, 16, 31, .96);
+  }
+}
+
+@media (orientation: landscape) {
+  html.mobile-room1.mobile-room1-creating .mobile-portrait-notice { display: grid; }
 }
 
 @media (max-width: 720px) and (orientation: landscape) {

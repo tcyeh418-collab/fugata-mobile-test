@@ -1,13 +1,13 @@
 {
   "id": "../index.html?mobile=room1",
-  "name": "Fugata Escape Room — Room 1",
-  "short_name": "Fugata Room 1",
-  "description": "Fugata 音樂密室逃脫第一室手機版",
+  "name": "Fugata Escape Room — Room 1–5 Playtest",
+  "short_name": "Fugata Room 1–5",
+  "description": "Fugata 音樂密室逃脫第一至五室手機試玩版",
   "lang": "zh-Hant",
   "start_url": "../index.html?mobile=room1",
   "scope": "../",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "any",
   "background_color": "#05070d",
   "theme_color": "#080b0f",
   "icons": [

@@ -1,5 +1,3 @@
-const ROOM1_MOBILE_PLAYTEST_PACKAGE = true;
-
 export const DOOR01_AUDIO_MANIFEST = Object.freeze({
   door01FragmentA: "assets/audio/fugata/door01_fragment_a.mp3",
   door01FragmentB: "assets/audio/fugata/door01_fragment_b.mp3",
@@ -102,7 +100,7 @@ export const DOOR06_AUDIO_MANIFEST = Object.freeze({
   door06Complete: "assets/audio/fugata/door06_complete.mp3",
 });
 
-const FULL_TRACK_NAME = "fugata_full.mp3";
+const FULL_TRACK_NAME = "fugata_full.wav";
 const DOOR03_LOOP_CROSSFADE = 0.1;
 const DOOR03_LOOP_VOLUME = 0.72;
 
@@ -321,19 +319,15 @@ export function createAudioSystem(fullTrack, callbacks = {}) {
   function preloadAssets() {
     if (preloadPromise) return preloadPromise;
     if (!context) return Promise.resolve(false);
-    const groups = ROOM1_MOBILE_PLAYTEST_PACKAGE
-      ? [[DOOR01_AUDIO_MANIFEST, "onFragmentAssetsState"]]
-      : [
-        [DOOR01_AUDIO_MANIFEST, "onFragmentAssetsState"],
-        [DOOR02_AUDIO_MANIFEST, "onDoor02AssetsState"],
-        [SUCCESS_LOOP_MANIFEST, "onSuccessLoopState"],
-        [DOOR03_AUDIO_MANIFEST, "onDoor03AssetsState"],
-        [DOOR04_AUDIO_MANIFEST, "onDoor04AssetsState"],
-        [DOOR05_AUDIO_MANIFEST, "onDoor05AssetsState"],
-        [DOOR06_AUDIO_MANIFEST, "onDoor06AssetsState"],
-      ];
-    preloadPromise = Promise.all(groups.map(([manifest, callbackName]) => loadGroup(manifest, callbackName)))
-      .then((results) => results.every(Boolean));
+    preloadPromise = Promise.all([
+      loadGroup(DOOR01_AUDIO_MANIFEST, "onFragmentAssetsState"),
+      loadGroup(DOOR02_AUDIO_MANIFEST, "onDoor02AssetsState"),
+      loadGroup(SUCCESS_LOOP_MANIFEST, "onSuccessLoopState"),
+      loadGroup(DOOR03_AUDIO_MANIFEST, "onDoor03AssetsState"),
+      loadGroup(DOOR04_AUDIO_MANIFEST, "onDoor04AssetsState"),
+      loadGroup(DOOR05_AUDIO_MANIFEST, "onDoor05AssetsState"),
+      loadGroup(DOOR06_AUDIO_MANIFEST, "onDoor06AssetsState"),
+    ]).then((results) => results.every(Boolean));
     return preloadPromise;
   }
 

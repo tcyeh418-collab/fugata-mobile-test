@@ -137,27 +137,28 @@ const ROOM04_ART_SOURCES = Object.freeze({
   pinxin: "assets/art/fugata/room03/pinxin.png?v=room04-movement-fixes-v6",
 });
 
-const ROOM1_MOBILE_PLAYTEST_PACKAGE = true;
-
 export function createRenderer(canvas, options = {}) {
   loadNpcArt();
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas 2D context is unavailable.");
   const externalRoom01Ui = options.externalRoom01Ui === true;
+  const externalRoomUiRooms = new Set(
+    options.externalRoomUiRooms ?? (externalRoom01Ui ? [1] : []),
+  );
   const room01Art = Object.fromEntries(
     Object.entries(ROOM01_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
   );
   const room02Art = Object.fromEntries(
-    Object.entries(ROOM1_MOBILE_PLAYTEST_PACKAGE ? {} : ROOM02_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
+    Object.entries(ROOM02_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
   );
   const room03Art = Object.fromEntries(
-    Object.entries(ROOM1_MOBILE_PLAYTEST_PACKAGE ? {} : ROOM03_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
+    Object.entries(ROOM03_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
   );
   const room04Art = Object.fromEntries(
-    Object.entries(ROOM1_MOBILE_PLAYTEST_PACKAGE ? {} : ROOM04_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
+    Object.entries(ROOM04_ART_SOURCES).map(([key, source]) => [key, loadImage(source)]),
   );
-  const room05Image = ROOM1_MOBILE_PLAYTEST_PACKAGE ? new Image() : loadImage(ROOM05_ART.src);
-  const room06Image = ROOM1_MOBILE_PLAYTEST_PACKAGE ? new Image() : loadImage(ROOM06_ART.src);
+  const room05Image = loadImage(ROOM05_ART.src);
+  const room06Image = loadImage(ROOM06_ART.src);
   const reducedMotion = options.reducedMotion
     ?? (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
 
@@ -242,13 +243,17 @@ export function createRenderer(canvas, options = {}) {
     drawRoom04Foreground(state);
     drawExitGuidance(context,state);
     context.restore();
-    if(!state.tutorialOpen && !(externalRoom01Ui && state.gameProgress.currentRoom === 1)) {
+    if(!state.tutorialOpen && !externalRoomUiRooms.has(state.gameProgress.currentRoom)) {
       drawContextHint(state, cameraX);
     }
-    if (state.gameProgress.currentRoom === 3 && !state.dialogue.active) {
+    if (
+      state.gameProgress.currentRoom === 3
+      && !state.dialogue.active
+      && !externalRoomUiRooms.has(3)
+    ) {
       drawRoom03StatusToast(state);
     }
-    if (state.dialogue.active && !(externalRoom01Ui && state.gameProgress.currentRoom === 1)) {
+    if (state.dialogue.active && !externalRoomUiRooms.has(state.gameProgress.currentRoom)) {
       drawDialogue(state);
     }
     if (state.gameProgress.currentRoom === 6 && state.door06.status === "confirming") {
