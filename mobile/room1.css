@@ -467,10 +467,12 @@ html.mobile-room1 .room-help-dialog p { margin: 7px 0; }
 html.mobile-room1 .room-help-dialog button { min-height: 44px; }
 
 .mobile-rotate-notice,
-.mobile-portrait-notice { display: none; }
+.mobile-portrait-notice,
+.mobile-ending-portrait-notice { display: none; }
 
 .mobile-rotate-notice,
-.mobile-portrait-notice {
+.mobile-portrait-notice,
+.mobile-ending-portrait-notice {
   position: fixed;
   z-index: 9999;
   inset: 0;
@@ -486,7 +488,95 @@ html.mobile-room1 .room-help-dialog button { min-height: 44px; }
 }
 
 .mobile-rotate-notice strong,
-.mobile-portrait-notice strong { color: #f0bf67; font-size: 22px; }
+.mobile-portrait-notice strong,
+.mobile-ending-portrait-notice strong { color: #f0bf67; font-size: 22px; }
+
+html.mobile-room1.mobile-room1-ending,
+html.mobile-room1.mobile-room1-ending body {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-x: none;
+}
+
+html.mobile-room1.mobile-room1-ending body {
+  position: static;
+  min-height: 100dvh;
+  padding: var(--mobile-room1-safe-top) var(--mobile-room1-safe-right)
+    var(--mobile-room1-safe-bottom) var(--mobile-room1-safe-left);
+}
+
+html.mobile-room1.mobile-room1-ending .shell {
+  width: 100%;
+  min-height: 100dvh;
+  margin: 0;
+  overflow: visible;
+}
+
+html.mobile-room1.mobile-room1-ending #chapter-complete {
+  width: 100%;
+  max-width: none;
+  min-height: 100dvh;
+  margin: 0;
+  padding: clamp(16px, 4.5vw, 24px);
+  overflow: visible;
+  border-width: 0;
+  background:
+    linear-gradient(180deg, rgba(3, 6, 14, .02) 0%, rgba(3, 6, 14, .12) 18%, rgba(3, 6, 14, .97) 31%),
+    url('../assets/art/fugata/screens/ending-mushroom-observatory-v1.png') center top / 100% auto no-repeat,
+    #070b17;
+}
+
+html.mobile-room1.mobile-room1-ending .ending-core {
+  width: 100%;
+  margin: clamp(210px, 61vw, 285px) 0 12px;
+}
+
+html.mobile-room1.mobile-room1-ending .ending-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+html.mobile-room1.mobile-room1-ending .ending-content,
+html.mobile-room1.mobile-room1-ending .album-panel {
+  width: 100%;
+  padding: clamp(16px, 4vw, 22px);
+  background: rgba(5, 9, 19, .93);
+}
+
+html.mobile-room1.mobile-room1-ending .ending-content { order: 1; }
+html.mobile-room1.mobile-room1-ending .ending-cover-column { order: 2; width: 100%; }
+html.mobile-room1.mobile-room1-ending .album-panel { margin: 0; }
+html.mobile-room1.mobile-room1-ending .ending-kicker { font-size: 12px; }
+html.mobile-room1.mobile-room1-ending h2 em { font-size: clamp(34px, 11vw, 48px); }
+html.mobile-room1.mobile-room1-ending .ending-complete {
+  font-size: clamp(14px, 4vw, 17px);
+  line-height: 1.65;
+}
+html.mobile-room1.mobile-room1-ending .ending-copy {
+  font-size: clamp(16px, 4.3vw, 19px);
+  line-height: 1.75;
+}
+html.mobile-room1.mobile-room1-ending .ending-dialogue p {
+  margin: 12px 0;
+  font-size: clamp(15px, 4vw, 18px);
+  line-height: 1.75;
+}
+html.mobile-room1.mobile-room1-ending .ending-player { gap: 14px; }
+html.mobile-room1.mobile-room1-ending .ending-player button,
+html.mobile-room1.mobile-room1-ending .ending-actions button {
+  min-height: 48px;
+  font-size: 15px;
+}
+html.mobile-room1.mobile-room1-ending .player-heading,
+html.mobile-room1.mobile-room1-ending .player-time,
+html.mobile-room1.mobile-room1-ending .player-controls { font-size: 13px; }
+html.mobile-room1.mobile-room1-ending .ending-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+}
 
 @media (orientation: portrait) {
   html.mobile-room1.mobile-room1-playing .mobile-room1-stage { visibility: hidden; }
@@ -521,6 +611,23 @@ html.mobile-room1 .room-help-dialog button { min-height: 44px; }
 
 @media (orientation: landscape) {
   html.mobile-room1.mobile-room1-creating .mobile-portrait-notice { display: grid; }
+  html.mobile-room1.mobile-room1-ending,
+  html.mobile-room1.mobile-room1-ending body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  html.mobile-room1.mobile-room1-ending body {
+    position: fixed;
+    inset: 0;
+  }
+  html.mobile-room1.mobile-room1-ending .shell {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  html.mobile-room1.mobile-room1-ending #chapter-complete { visibility: hidden; }
+  html.mobile-room1.mobile-room1-ending .mobile-ending-portrait-notice { display: grid; }
 }
 
 @media (max-width: 720px) and (orientation: landscape) {

@@ -1,6 +1,6 @@
-# Fugata Room 1–5 Mobile Playtest
+# Fugata Room 1–6 Mobile Playtest
 
-GitHub Pages 手機試玩站：Room 1–5 使用動態虛擬搖桿與右側菱形操作鍵。
+GitHub Pages 手機試玩站：Room 1–6 使用動態虛擬搖桿與右側菱形操作鍵。
 
 手機入口：`mobile/index.html?mobile=room1`
 

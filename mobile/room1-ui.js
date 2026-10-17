@@ -22,6 +22,13 @@ import {
   nearestDoor05Node,
   nearestDoor05Terminal,
 } from "../js/door05.js";
+import {
+  activeDoor06Relay,
+  door06ReadyForAnswer,
+  nearDoor06FinalReference,
+  nearestDoor06Memory,
+  nearestDoor06Relay,
+} from "../js/door06.js";
 import { heldFragment } from "../js/state.js?v=room04-movement-fixes-v6";
 import { currentObjective } from "../js/room-help.js?v=room04-movement-fixes-v6";
 
@@ -46,7 +53,7 @@ function installMobileMetadata() {
   if (!document.querySelector('link[rel="manifest"][data-mobile-room1]')) {
     const manifest = document.createElement("link");
     manifest.rel = "manifest";
-    manifest.href = new URL("./room1.webmanifest?v=8", import.meta.url).href;
+    manifest.href = new URL("./room1.webmanifest?v=9", import.meta.url).href;
     manifest.dataset.mobileRoom1 = "true";
     document.head.append(manifest);
   }
@@ -55,7 +62,7 @@ function installMobileMetadata() {
     ["mobile-web-app-capable", "yes"],
     ["apple-mobile-web-app-capable", "yes"],
     ["apple-mobile-web-app-status-bar-style", "black-translucent"],
-    ["apple-mobile-web-app-title", "Fugata Room 1–5"],
+    ["apple-mobile-web-app-title", "Fugata Room 1–6"],
   ];
   for (const [name, content] of metas) {
     if (document.querySelector(`meta[name="${name}"]`)) continue;
@@ -220,12 +227,13 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   installMobileMetadata();
   const frame = canvas.closest(".canvas-frame");
   const characterScreen = document.querySelector("#character-screen");
+  const chapterComplete = document.querySelector("#chapter-complete");
   const touchControls = frame?.querySelector(".game-touch-controls");
   const interactionPanel = gameScreen.querySelector(".interaction-panel");
   if (!frame || !touchControls || !interactionPanel) throw new Error("Room 1 mobile controls are missing");
 
   const stage = element("section", "mobile-room1-stage");
-  stage.setAttribute("aria-label", "Room 1–5 手機遊戲畫面");
+  stage.setAttribute("aria-label", "Room 1–6 手機遊戲畫面");
   const scene = element("section", "mobile-scene-column");
   const actions = element("section", "mobile-action-diamond");
   actions.setAttribute("aria-label", "互動控制");
@@ -283,13 +291,20 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
 
   const rotate = element("aside", "mobile-rotate-notice");
   rotate.setAttribute("role", "status");
-  rotate.append(element("strong", "", "請將手機旋轉為橫向"), element("span", "", "Room 1–5 的主要遊玩方向為橫式"));
+  rotate.append(element("strong", "", "請將手機旋轉為橫向"), element("span", "", "Room 1–6 的主要遊玩方向為橫式"));
 
   const portrait = element("aside", "mobile-portrait-notice");
   portrait.setAttribute("role", "status");
   portrait.append(
     element("strong", "", "請將手機旋轉為直向"),
     element("span", "", "角色建立以直式操作；確認進入 Room 1 後再轉為橫向"),
+  );
+
+  const endingPortrait = element("aside", "mobile-ending-portrait-notice");
+  endingPortrait.setAttribute("role", "status");
+  endingPortrait.append(
+    element("strong", "", "請將手機旋轉為直向"),
+    element("span", "", "結局畫面以直式閱讀，旋轉後可繼續播放完整歌曲"),
   );
 
   const labels = new Map([
@@ -317,7 +332,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   scene.append(frame, zone, joystick, hud, feedback, interactionPanel, actions, dialogue);
   stage.append(scene);
   gameScreen.prepend(stage);
-  document.body.append(rotate, portrait);
+  document.body.append(rotate, portrait, endingPortrait);
 
   const virtualJoystick = installVirtualJoystick({ canvas, stage, zone, joystick, knob });
   installFullscreenButton(fullscreen, fullscreenStatus, canvas);
@@ -327,7 +342,12 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
     if (!dialog) return;
     const items = dialog.querySelectorAll("li");
     const room = state.gameProgress.currentRoom;
-    const copy = room === 5 ? [
+    const copy = room === 6 ? [
+      "依發光順序靠近五個繼電器，按「聆聽訊號」並完整播放，逐一讓訊號回到核心。",
+      "五個訊號完成後，到中央終端按「播放參考」，自然播放完畢會解鎖三段記憶。",
+      "靠近記憶後按「試聽記憶」比較，按「選取記憶」，再用獨立的「確認提交」送回核心。",
+      "選取後仍可按「取消選取」返回比較；重構完成後走向右側出口。",
+    ] : room === 5 ? [
       "先靠近已解鎖的節奏終端，按「聆聽節奏」切換並播放目前階段。",
       "走到九拍節奏環，右側按鈕會顯示「選擇重音」或「取消重音」；每階段選三個。",
       "到測試台按「測試節奏」；完成三個階段後，到最終台按「啟動推進」。",
@@ -357,10 +377,12 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   updateHelpCopy();
 
   function syncPresentation(state = getState()) {
-    const playing = state.phase === "game" && [1, 2, 3, 4, 5].includes(state.gameProgress.currentRoom);
+    const playing = state.phase === "game" && [1, 2, 3, 4, 5, 6].includes(state.gameProgress.currentRoom);
     const creating = state.phase === "character" && characterScreen && !characterScreen.hidden;
+    const ending = state.phase === "ending" && chapterComplete && !chapterComplete.hidden;
     document.documentElement.classList.toggle("mobile-room1-playing", playing);
     document.documentElement.classList.toggle("mobile-room1-creating", Boolean(creating));
+    document.documentElement.classList.toggle("mobile-room1-ending", Boolean(ending));
     stage.hidden = !playing;
     if (!playing) virtualJoystick.stop();
     return playing;
@@ -369,6 +391,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   const presentationObserver = new MutationObserver(() => syncPresentation());
   presentationObserver.observe(gameScreen, { attributes: true, attributeFilter: ["hidden"] });
   if (characterScreen) presentationObserver.observe(characterScreen, { attributes: true, attributeFilter: ["hidden"] });
+  if (chapterComplete) presentationObserver.observe(chapterComplete, { attributes: true, attributeFilter: ["hidden"] });
   syncPresentation();
 
   let signature = "";
@@ -387,6 +410,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
     const room3 = room === 3;
     const room4 = room === 4;
     const room5 = room === 5;
+    const room6 = room === 6;
     const atRoom1Door = room === 1 && isNearDoor(state);
     const selectedDoor03Output = room3
       ? door03PortById(state, state.door03.selectedOutputPortId)
@@ -424,11 +448,30 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       || ["testing", "completion-spinning", "completion-hold", "launching", "opening"]
         .includes(state.door05.status)
     );
-    stage.dataset.movementLocked = String(room5MovementLocked);
-    if (room5MovementLocked) virtualJoystick.stop();
+    const room6Relay = room6 ? nearestDoor06Relay(state) : null;
+    const room6ExpectedRelay = room6 ? activeDoor06Relay(state) : null;
+    const room6Reference = room6 && nearDoor06FinalReference(state);
+    const room6Memory = room6 ? nearestDoor06Memory(state) : null;
+    const room6Ready = room6 && door06ReadyForAnswer(state);
+    const room6Confirming = room6 && state.door06.status === "confirming";
+    const room6Busy = room6 && [
+      "relay-playing", "relay-replay", "reference-playing", "stage-transition",
+      "checking", "rejected", "reconstructing", "opening", "open",
+    ].includes(state.door06.status);
+    const room6MovementLocked = room6 && (
+      state.door06.endingTriggered
+      || [
+        "relay-playing", "relay-replay", "reference-playing", "stage-transition",
+        "confirming", "checking", "rejected", "reconstructing", "opening",
+      ].includes(state.door06.status)
+    );
+    const movementLocked = room5MovementLocked || room6MovementLocked;
+    stage.dataset.movementLocked = String(movementLocked);
+    if (movementLocked) virtualJoystick.stop();
     roomNumber.textContent = `ROOM ${room}`;
-    roomName.textContent = room5
-      ? "讓九拍節奏向前奔跑"
+    roomName.textContent = room6
+      ? "讓最初的樂句主題回歸"
+      : room5 ? "讓九拍節奏向前奔跑"
       : room4 ? "依次排列並聆聽聲部組合"
         : room3 ? "組建模組合成器"
         : room2 ? "聽見主題的回應" : "找到旋律的種子";
@@ -441,15 +484,28 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       const room5ListenLabel = room5Terminal
         ? `聆聽\n${door05Phase(room5Terminal.phaseId)?.displayName ?? "節奏"}`
         : "聆聽\n節奏";
-      listenButton.textContent = room5
+      const room6ListenLabel = room6Memory
+        ? "試聽\n記憶"
+        : room6Reference ? "播放\n參考"
+          : room6Relay?.activated ? "重聽\n訊號" : "聆聽\n訊號";
+      listenButton.textContent = room6
+        ? room6ListenLabel
+        : room5
         ? room5ListenLabel
         : room4 ? room4ListenLabel : room3 ? "檢查\n監聽" : "聆聽";
-      listenButton.setAttribute("aria-label", room5
+      listenButton.setAttribute("aria-label", room6
+        ? room6ListenLabel.replace("\n", "／")
+        : room5
         ? room5ListenLabel.replace("\n", "／")
         : room4
         ? room4ListenLabel.replace("\n", "／")
         : room3 ? "檢查／監聽" : "聆聽");
-      listenButton.disabled = room5
+      listenButton.disabled = room6
+        ? room6Busy || room6Confirming || !(room6Relay || room6Reference || room6Memory)
+          || Boolean(room6Memory && !room6Ready)
+          || Boolean(room6Relay && state.door06.stage === "relays"
+            && !room6Relay.activated && room6Relay.id !== room6ExpectedRelay?.id)
+        : room5
         ? room5Busy || !room5Terminal || !room5TerminalUnlocked
         : room4
         ? room4Busy || room4Locked || room4Test
@@ -466,7 +522,10 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       const room5EnterLabel = room5Node && room5Selected.includes(room5Node.stepNumber)
         ? "取消\n重音"
         : "選擇\n重音";
-      enterButton.textContent = room5
+      const room6EnterLabel = "選取\n記憶";
+      enterButton.textContent = room6
+        ? room6EnterLabel
+        : room5
         ? room5EnterLabel
         : room4
         ? room4EnterLabel
@@ -474,11 +533,14 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
           : room2 ? "連接\n確認" : atRoom1Door ? "提交" : "拿取\n確認";
       enterButton.setAttribute(
         "aria-label",
-        room5 ? room5EnterLabel.replace("\n", "／")
+        room6 ? room6EnterLabel.replace("\n", "／")
+          : room5 ? room5EnterLabel.replace("\n", "／")
           : room4 ? room4EnterLabel.replace("\n", "／")
           : room3 ? "接線／確認" : room2 ? "連接／確認" : atRoom1Door ? "提交旋律" : "拿取／確認",
       );
-      enterButton.disabled = room5
+      enterButton.disabled = room6
+        ? room6Busy || room6Confirming || !room6Memory || !room6Ready
+        : room5
         ? room5Busy || !room5Node || room5PhaseComplete
           || room5Confirmed.includes(room5Node?.stepNumber)
         : room4
@@ -496,11 +558,16 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
           ? "推進中"
           : "測試中"
         : room5Final ? "啟動\n推進" : "測試\n節奏";
-      testButton.textContent = room5 ? room5TestLabel : room4 ? room4TestLabel : "測試";
-      testButton.setAttribute("aria-label", room5
+      const room6TestLabel = "確認\n提交";
+      testButton.textContent = room6 ? room6TestLabel : room5 ? room5TestLabel : room4 ? room4TestLabel : "測試";
+      testButton.setAttribute("aria-label", room6
+        ? room6TestLabel.replace("\n", "／")
+        : room5
         ? room5TestLabel.replace("\n", "／")
         : room4 ? room4TestLabel.replace("\n", "／") : "測試");
-      testButton.disabled = room5
+      testButton.disabled = room6
+        ? !room6Confirming
+        : room5
         ? room5Busy || (!room5Test && !room5Final)
           || (room5Final && !state.door05.finalLaunchReady)
         : room4
@@ -509,9 +576,9 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
     }
     const cancelButton = actionButtons.get("Escape");
     if (cancelButton) {
-      cancelButton.textContent = room5 ? "未使用" : room4 ? "歸還\n音匣" : room3 ? "取消\n接線" : "取消\n歸還";
-      cancelButton.setAttribute("aria-label", room5 ? "本關未使用" : room4 ? "歸還音匣" : room3 ? "取消接線" : "取消／歸還");
-      cancelButton.disabled = room2 || (room3 && !selectedDoor03Output)
+      cancelButton.textContent = room6 ? "取消\n選取" : room5 ? "未使用" : room4 ? "歸還\n音匣" : room3 ? "取消\n接線" : "取消\n歸還";
+      cancelButton.setAttribute("aria-label", room6 ? "取消選取" : room5 ? "本關未使用" : room4 ? "歸還音匣" : room3 ? "取消接線" : "取消／歸還");
+      cancelButton.disabled = (room6 && !room6Confirming) || room2 || (room3 && !selectedDoor03Output)
         || (room4 && (!room4Held || room4Busy || room4Locked)) || room5;
     }
 
@@ -545,6 +612,12 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       state.door05.testStep,
       state.door05.rejectionRemaining,
       state.door05.finalLaunchReady,
+      state.door06.stage,
+      state.door06.status,
+      state.door06.activatedRelayCount,
+      state.door06.finalReferenceCompleted,
+      state.door06.selectedMemoryId,
+      state.door06.completed,
       state.ui.message?.lines,
       state.ui.message?.kind,
       entry?.speaker,
@@ -561,9 +634,21 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
         .replace("按 E 提交", "按「提交」")
         .replace("從頭播放測試", "按「測試排列」")
         .replace("測試台按 Space", "測試台按「測試節奏」")
-        .replace("最終驅動台按 Space", "最終驅動台按「啟動推進」");
+        .replace("最終驅動台按 Space", "最終驅動台按「啟動推進」")
+        .replace("按 E", "按「聆聽」")
+        .replace("按 Enter", "按「選取記憶」")
+        .replace("Space", "「確認提交」");
     objective.textContent = `任務：${objectiveCopy}`;
-    if (room5) {
+    if (room6) {
+      carry.textContent = state.door06.completed
+        ? "核心重構完成 · 前往右側出口"
+        : state.door06.stage === "memories"
+          ? room6Confirming ? `已選：${room6Memory?.displayLabel ?? "記憶片段"} · 等待確認提交`
+            : `記憶：${state.door06.finalReferenceCompleted ? "已解鎖" : "鎖定"} · 錯誤 ${state.door06.wrongAttempts} 次`
+          : state.door06.stage === "final-reference"
+            ? `繼電器：5／5 · 最終參考${state.door06.finalReferenceCompleted ? "完成" : "待播放"}`
+            : `繼電器：${state.door06.activatedRelayCount}／5 · 下一個：${room6ExpectedRelay?.displayName ?? "最終參考"}`;
+    } else if (room5) {
       carry.textContent = state.door05.status === "testing"
         ? `測試：第 ${state.door05.testBarIndex + 1}／2 小節 · 第 ${state.door05.testStep || 1}／9 拍`
         : state.door05.finalLaunchReady

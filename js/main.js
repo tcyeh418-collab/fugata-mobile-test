@@ -74,7 +74,7 @@ if (mobileRoom1Enabled) {
   if (viewport) viewport.content = "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no";
   const mobileStyles = document.createElement("link");
   mobileStyles.rel = "stylesheet";
-  mobileStyles.href = "mobile/room1.css?v=8";
+  mobileStyles.href = "mobile/room1.css?v=9";
   document.head.append(mobileStyles);
 }
 const localTestEnabled = false; // Public playtest package: no local QA routes.
@@ -129,7 +129,7 @@ try { storage = window.localStorage; } catch { storage = {getItem:()=>null,setIt
 const saveCheckEnabled=localTestEnabled && new URLSearchParams(location.search).get('savecheck')==='1';
 const releaseLabel = document.createElement('p');
 releaseLabel.id = 'release-label';
-releaseLabel.textContent = 'Room 1–5 手機測試版｜正常遊玩：保存角色與進度';
+releaseLabel.textContent = 'Room 1–6 手機測試版｜正常遊玩：保存角色與進度';
 const hubLink = document.createElement('a'); hubLink.href = 'test.html'; hubLink.textContent = '返回統一測試首頁';
 releaseLabel.append(' · ', hubLink);
 if (localTestingAvailable) document.body.prepend(releaseLabel);
@@ -201,7 +201,7 @@ document.addEventListener("visibilitychange",()=>{if(document.hidden)persistProg
 const renderer = createRenderer(canvas, {
   reducedMotion: reducedMotionEnabled,
   externalRoom01Ui: mobileRoom1Enabled,
-  externalRoomUiRooms: mobileRoom1Enabled ? [1, 2, 3, 4, 5] : [],
+  externalRoomUiRooms: mobileRoom1Enabled ? [1, 2, 3, 4, 5, 6] : [],
 });
 const audio = createAudioSystem(fullTrack, {
   onFullTrackState(next) {
@@ -482,7 +482,7 @@ const fullscreenTools=createFullscreenTools({
 });
 let mobileRoom1Ui = null;
 if (mobileRoom1Enabled) {
-  import("../mobile/room1-ui.js?v=8").then(({ installMobileRoom1Ui }) => {
+  import("../mobile/room1-ui.js?v=9").then(({ installMobileRoom1Ui }) => {
     mobileRoom1Ui = installMobileRoom1Ui({
       canvas,
       gameScreen,
