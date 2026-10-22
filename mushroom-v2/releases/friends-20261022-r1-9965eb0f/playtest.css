@@ -1,0 +1,30 @@
+/* Existing viewport/canvas framing is unchanged. New overlays use its UI anchors. */
+#roomFade{position:absolute;inset:0;background:#000;z-index:80;pointer-events:all}
+#skillHud{position:absolute;left:30px;top:96px;display:flex;gap:8px;z-index:5;pointer-events:none}
+#skillHud.in-studio{top:auto;bottom:24px;left:24px}
+.skill-icon{width:46px;height:46px;display:block;filter:drop-shadow(0 2px 5px #102c30)}
+.skill-icon svg{width:100%;height:100%;overflow:visible}
+.skill-base{fill:#15383eee;stroke:#718d83;stroke-width:1.5}
+.skill-symbol{fill:none;stroke:#f3dca4;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.skill-ring{fill:none;stroke:#bce0a2;stroke-width:3;stroke-dasharray:100;transform:rotate(-90deg);transform-origin:24px 24px}
+.skill-icon.warning{animation:skill-warning .65s ease-in-out infinite alternate}
+.frozen .skill-icon.warning{animation-play-state:paused}
+@keyframes skill-warning{to{opacity:.4}}
+.gacha-machine{position:relative;width:136px;height:162px;margin:18px auto 40px;border:3px solid #c5b68c;border-radius:30px 30px 10px 10px;background:#456a65;--turn:0deg;--drop:0;--open:0}
+.machine-window{position:absolute;top:10px;left:18px;width:94px;height:67px;border-radius:25px;background:#173e45;overflow:hidden}
+.machine-window i{position:absolute;width:24px;height:24px;border:2px solid #d7c48f;border-radius:50%;top:25px;left:32px;transform:rotate(var(--turn)) translateX(23px)}
+.machine-window i:nth-child(2){transform:rotate(calc(var(--turn) + 120deg)) translateX(23px)}
+.machine-window i:nth-child(3){transform:rotate(calc(var(--turn) + 240deg)) translateX(23px)}
+.machine-handle{position:absolute;top:79px;left:52px;font-size:35px;line-height:1;transform:rotate(var(--turn));color:#ecdbac}
+.machine-slot{position:absolute;bottom:8px;left:39px;width:53px;height:23px;border-radius:8px;background:#122c33}
+.machine-capsule{position:absolute;top:120px;left:48px;width:35px;height:35px;opacity:var(--drop);transform:translateY(calc(var(--drop)*53px))}
+.machine-capsule i,.machine-capsule b{position:absolute;left:0;width:35px;height:18px;border:2px solid #f0d3a0;display:block;background:#bd8c68;box-sizing:border-box}
+.machine-capsule i{top:0;border-radius:30px 30px 0 0;transform:translate(calc(var(--open)*-20px),calc(var(--open)*-15px)) rotate(calc(var(--open)*-35deg))}
+.machine-capsule b{top:18px;border-radius:0 0 30px 30px;transform:translateX(calc(var(--open)*14px)) rotate(calc(var(--open)*22deg))}
+.supply-lid{display:none}
+#gachaPanel[data-supply=true] .gacha-machine{border-radius:3px;height:100px;margin-top:65px;background:#6b684e}
+#gachaPanel[data-supply=true] .machine-window,#gachaPanel[data-supply=true] .machine-handle,#gachaPanel[data-supply=true] .machine-slot,#gachaPanel[data-supply=true] .machine-capsule{display:none}
+#gachaPanel[data-supply=true] .supply-lid{display:block;position:absolute;left:-8px;top:-8px;width:146px;height:20px;background:#b6ac7e;transform-origin:left;transform:rotate(calc(var(--drop)*-35deg))}
+#quizFeedback{line-height:1.65;white-space:pre-line}
+@media(max-width:650px){#skillHud{left:18px;top:82px;gap:5px}.skill-icon{width:36px;height:36px}}
+@media(prefers-reduced-motion:reduce){.skill-icon.warning{animation:none;outline:2px solid #f4db9e;border-radius:50%}}

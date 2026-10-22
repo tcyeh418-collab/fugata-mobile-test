@@ -1,0 +1,7 @@
+/* Additive Map 3 panels only; shared canvas, camera, HUD anchors and responsive scaling stay unchanged. */
+.map3-entry{display:flex;gap:20px}.map3-entry .text-button{font-size:10px;margin-top:8px;color:#d6cba4}
+#giantHud{position:absolute;left:30px;top:90px;z-index:2;border:1px solid #cbdca655;background:#17373cd9;color:#d3e2af;padding:7px 10px;font:10px monospace}
+#crouchHint{position:absolute;bottom:37px;right:27px;z-index:2;color:#ced9b9;font-size:10px;letter-spacing:1px}
+.reactor-icon{font:90px Georgia,serif;color:#e6d99b}
+.future-preview{top:13%;left:10%;right:10%;padding:20px;background:#17373cdd;border:1px solid #9bb59266;text-align:center}.future-preview h2{font-size:30px}.future-preview p{font-size:12px}.future-preview button{font-size:11px}
+@media(max-width:750px){#giantHud{left:18px;top:76px;font-size:8px;padding:4px 7px}#crouchHint{bottom:75px;right:18px;font-size:8px}.map3-entry{gap:12px}.map3-entry .text-button{font-size:9px}.future-preview h2{font-size:22px}}
