@@ -1,0 +1,677 @@
+{
+  "version": "map1-gameplay-kit-v1",
+  "pixelScale": 2,
+  "nativeViewport": [
+    640,
+    360
+  ],
+  "gameViewport": [
+    1280,
+    720
+  ],
+  "background": "./background/manifest.json",
+  "backgroundParallax": 1,
+  "animationClock": "game.time advanced by original Game.step at fixed1/120; never frame count",
+  "sources": "sources/generated-{0,1,2}-v1.png; alpha threshold180 removes generator soft halo; nearest normalization once during asset preparation",
+  "assets": [
+    {
+      "id": "ground-top",
+      "version": 1,
+      "file": "assets/ground-top-v1.png",
+      "native": [
+        64,
+        12
+      ],
+      "display": [
+        128,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "wall",
+      "version": 1,
+      "file": "assets/wall-v1.png",
+      "native": [
+        32,
+        32
+      ],
+      "display": [
+        64,
+        64
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "brick",
+      "version": 1,
+      "file": "assets/brick-v1.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "roof",
+      "version": 1,
+      "file": "assets/roof-v1.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "pipe",
+      "version": 1,
+      "file": "assets/pipe-v1.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "scaffold",
+      "version": 1,
+      "file": "assets/scaffold-v1.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "suspended",
+      "version": 1,
+      "file": "assets/suspended-v1.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "moving",
+      "version": 1,
+      "file": "assets/moving-v1.png",
+      "native": [
+        96,
+        11
+      ],
+      "display": [
+        192,
+        22
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "shore",
+      "version": 1,
+      "file": "assets/shore-v1.png",
+      "native": [
+        4,
+        32
+      ],
+      "display": [
+        8,
+        64
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "water",
+      "version": 3,
+      "file": "assets/water-harbor-v3.png",
+      "native": [
+        64,
+        16
+      ],
+      "display": [
+        128,
+        32
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "checkpoint-off",
+      "version": 1,
+      "file": "assets/checkpoint-off-v1.png",
+      "native": [
+        18,
+        60
+      ],
+      "display": [
+        36,
+        120
+      ],
+      "scale": 2,
+      "anchor": [
+        9,
+        60
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "checkpoint-on",
+      "version": 1,
+      "file": "assets/checkpoint-on-v1.png",
+      "native": [
+        18,
+        60
+      ],
+      "display": [
+        36,
+        120
+      ],
+      "scale": 2,
+      "anchor": [
+        9,
+        60
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "exit",
+      "version": 1,
+      "file": "assets/exit-v1.png",
+      "native": [
+        95,
+        90
+      ],
+      "display": [
+        190,
+        180
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        90
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "police",
+      "version": 2,
+      "file": "assets/police-v2.png",
+      "native": [
+        192,
+        192
+      ],
+      "display": [
+        96,
+        96
+      ],
+      "scale": 2,
+      "anchor": [
+        24,
+        46
+      ],
+      "frames": 13,
+      "fps": 20,
+      "frame": {
+        "width": 48,
+        "height": 48
+      },
+      "columns": 4,
+      "visualHeight": 86,
+      "states": {
+        "arrival": {
+          "frames": [
+            0
+          ],
+          "duration": 0.12
+        },
+        "run": {
+          "frames": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8
+          ],
+          "fps": 20,
+          "loop": true,
+          "stride": 108
+        },
+        "stop": {
+          "frames": [
+            9
+          ],
+          "loop": false
+        },
+        "rise": {
+          "frames": [
+            10
+          ],
+          "loop": false
+        },
+        "fall": {
+          "frames": [
+            11
+          ],
+          "loop": false
+        },
+        "idle": {
+          "frames": [
+            12
+          ],
+          "loop": false
+        }
+      }
+    },
+    {
+      "id": "utility-lid",
+      "version": 4,
+      "file": "assets/utility-lid-v4.png",
+      "native": [
+        40,
+        22
+      ],
+      "display": [
+        80,
+        44
+      ],
+      "scale": 2,
+      "anchor": [
+        20,
+        22
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "inspection-lid",
+      "version": 4,
+      "file": "assets/inspection-lid-v4.png",
+      "native": [
+        30,
+        23
+      ],
+      "display": [
+        60,
+        46
+      ],
+      "scale": 2,
+      "anchor": [
+        15,
+        23
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "shaft-wall",
+      "version": 4,
+      "file": "assets/shaft-wall-v4.png",
+      "native": [
+        8,
+        32
+      ],
+      "display": [
+        16,
+        64
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "access-rim",
+      "version": 4,
+      "file": "assets/access-rim-v4.png",
+      "native": [
+        12,
+        4
+      ],
+      "display": [
+        24,
+        8
+      ],
+      "scale": 2,
+      "anchor": [
+        12,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "quay-edge",
+      "version": 4,
+      "file": "assets/quay-edge-v4.png",
+      "native": [
+        16,
+        64
+      ],
+      "display": [
+        32,
+        128
+      ],
+      "scale": 2,
+      "anchor": [
+        16,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "sea-ripple",
+      "version": 4,
+      "file": "assets/sea-ripple-v4.png",
+      "native": [
+        96,
+        12
+      ],
+      "display": [
+        192,
+        24
+      ],
+      "scale": 2,
+      "anchor": [
+        0,
+        0
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "harbor-outlet",
+      "version": 4,
+      "file": "assets/harbor-outlet-v4.png",
+      "native": [
+        24,
+        24
+      ],
+      "display": [
+        48,
+        48
+      ],
+      "scale": 2,
+      "anchor": [
+        12,
+        24
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "facade-a",
+      "version": 4,
+      "file": "assets/facade-a-lighting-v4.png",
+      "native": [
+        645,
+        280
+      ],
+      "display": [
+        1290,
+        560
+      ],
+      "scale": 2,
+      "anchor": [
+        205,
+        280
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "facade-b",
+      "version": 4,
+      "file": "assets/facade-b-lighting-v4.png",
+      "native": [
+        725,
+        280
+      ],
+      "display": [
+        1450,
+        560
+      ],
+      "scale": 2,
+      "anchor": [
+        300,
+        280
+      ],
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "player",
+      "version": 1,
+      "file": "assets/player-v1.png",
+      "native": [
+        512,
+        64
+      ],
+      "display": [
+        64,
+        64
+      ],
+      "anchor": [
+        32,
+        64
+      ],
+      "scale": 1,
+      "frames": 8,
+      "fps": 9,
+      "frame": {
+        "width": 64,
+        "height": 64
+      },
+      "columns": 8
+    },
+    {
+      "id": "player-reference",
+      "version": 1,
+      "file": "assets/player-reference-v1.png",
+      "native": [
+        52,
+        56
+      ],
+      "display": [
+        52,
+        56
+      ],
+      "anchor": [
+        26,
+        56
+      ],
+      "scale": 1,
+      "frames": 1,
+      "fps": 0
+    },
+    {
+      "id": "bounce-plant",
+      "version": 1,
+      "file": "assets/bounce-plant-v1.png",
+      "native": [
+        192,
+        48
+      ],
+      "display": [
+        128,
+        96
+      ],
+      "anchor": [
+        32,
+        48
+      ],
+      "scale": 2,
+      "frames": 3,
+      "fps": 0,
+      "columns": 3,
+      "frame": {
+        "width": 64,
+        "height": 48
+      },
+      "states": [
+        {
+          "frame": 0,
+          "visual": [
+            100,
+            66
+          ],
+          "capY": 524
+        },
+        {
+          "frame": 1,
+          "visual": [
+            100,
+            58
+          ],
+          "capY": 532
+        },
+        {
+          "frame": 2,
+          "visual": [
+            100,
+            70
+          ],
+          "capY": 520
+        }
+      ]
+    },
+    {
+      "id": "police-legacy",
+      "version": 1,
+      "file": "assets/police-v1.png",
+      "native": [
+        144,
+        96
+      ],
+      "display": [
+        96,
+        96
+      ],
+      "scale": 2,
+      "anchor": [
+        24,
+        46
+      ],
+      "frames": 6,
+      "fps": 8,
+      "frame": {
+        "width": 48,
+        "height": 48
+      },
+      "columns": 3,
+      "visualHeight": 86,
+      "states": {
+        "arrival": {
+          "frames": [
+            0
+          ],
+          "duration": 0.12
+        },
+        "run": {
+          "frames": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        "stop": {
+          "frames": [
+            5
+          ],
+          "loop": false
+        }
+      }
+    }
+  ]
+}

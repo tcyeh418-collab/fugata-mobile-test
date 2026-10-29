@@ -1,0 +1,2 @@
+export const SOUNDS={"jump": "audio/sfx/jump-v1.mp3", "spore": "audio/sfx/spore-v1.mp3", "bounce": "audio/sfx/bounce-v1.mp3", "hurt": "audio/sfx/hurt-v1.mp3", "checkpoint": "audio/sfx/checkpoint-v1.mp3", "police-start": "audio/sfx/police-start-v1.mp3", "clear": "audio/sfx/clear-v1.mp3", "button": "audio/sfx/button-v1.mp3"};
+export const EVENT_SOUNDS=Object.freeze({jump:"jump",spore:"spore",bounce:"bounce",hurt:"hurt","police-start":"police-start",land:null,"police-caught-presentation":null,"police-hurt":null,death:null,respawn:null});

@@ -1,0 +1,486 @@
+{
+  "version": "map1-night-to-dawn-sequence-v1",
+  "logicalWidth": 36000,
+  "logicalHeight": 720,
+  "fullArtLogicalWidth": 37120,
+  "native": [
+    18000,
+    360
+  ],
+  "fullNative": [
+    18560,
+    360
+  ],
+  "source": [
+    37322,
+    724
+  ],
+  "parallax": 1,
+  "pixelScale": 2,
+  "sections": [
+    0,
+    11000,
+    23000,
+    36000
+  ],
+  "tower": {
+    "singleLandmark": true,
+    "approxWorldSpan": [
+      35070,
+      35190
+    ],
+    "initialCameraReveal": 33790,
+    "panels": [
+      19,
+      20
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 0,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 2,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 1840,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 3,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 3680,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 4,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 5520,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 5,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 7360,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 6,
+      "section": 1,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 9200,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 7,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 11040,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 8,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 12880,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 9,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 14720,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 10,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 16560,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 11,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 18400,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 12,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 20240,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 13,
+      "section": 2,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 22080,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 14,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 23920,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 15,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 25760,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 16,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 27600,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 17,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 29440,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 18,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 31280,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 19,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 33120,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    },
+    {
+      "id": 20,
+      "section": 3,
+      "original": [
+        2172,
+        724
+      ],
+      "native": [
+        1080,
+        360
+      ],
+      "logicalStart": 34960,
+      "logicalWidth": 2160,
+      "overlapNative": 160
+    }
+  ],
+  "files": [
+    {
+      "file": "map1-00.png",
+      "start": 0,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 751834
+    },
+    {
+      "file": "map1-01.png",
+      "start": 1024,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 723920
+    },
+    {
+      "file": "map1-02.png",
+      "start": 2048,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 729489
+    },
+    {
+      "file": "map1-03.png",
+      "start": 3072,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 707602
+    },
+    {
+      "file": "map1-04.png",
+      "start": 4096,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 687715
+    },
+    {
+      "file": "map1-05.png",
+      "start": 5120,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 714167
+    },
+    {
+      "file": "map1-06.png",
+      "start": 6144,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 781698
+    },
+    {
+      "file": "map1-07.png",
+      "start": 7168,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 787808
+    },
+    {
+      "file": "map1-08.png",
+      "start": 8192,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 805456
+    },
+    {
+      "file": "map1-09.png",
+      "start": 9216,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 816393
+    },
+    {
+      "file": "map1-10.png",
+      "start": 10240,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 771877
+    },
+    {
+      "file": "map1-11.png",
+      "start": 11264,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 731705
+    },
+    {
+      "file": "map1-12.png",
+      "start": 12288,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 722668
+    },
+    {
+      "file": "map1-13.png",
+      "start": 13312,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 730156
+    },
+    {
+      "file": "map1-14.png",
+      "start": 14336,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 717005
+    },
+    {
+      "file": "map1-15.png",
+      "start": 15360,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 699342
+    },
+    {
+      "file": "map1-16.png",
+      "start": 16384,
+      "contentWidth": 1024,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 698666
+    },
+    {
+      "file": "map1-17.png",
+      "start": 17408,
+      "contentWidth": 592,
+      "height": 360,
+      "bleed": 4,
+      "bytes": 426145
+    }
+  ]
+}
