@@ -59,3 +59,18 @@
 body[data-compare="true"]{padding:0;background:#10202a}body[data-compare="true"]>:not(main){display:none}body[data-compare="true"] #host{height:100vh;min-height:0}body[data-compare="true"] .touch{display:none}
 @container(max-width:700px){#panel[data-mode="title"]{padding:18px!important}#panel[data-mode="title"] h2{font-size:26px!important;margin:6px 0 8px!important}#panel[data-mode="title"] p{font-size:12px;margin-bottom:12px}.intro-route{font-size:10px;gap:6px;padding:8px 0}.intro-controls{font-size:10px;gap:10px;margin:10px 0 8px}#introDetails small{font-size:9px;margin-bottom:12px}#panel[data-mode="title"] button{font-size:12px;min-height:32px;padding:7px 14px}#panel[data-mode="title"][data-intro="b"]{grid-template-columns:60px 1fr;gap:14px}#panel[data-mode="title"][data-intro="c"]{bottom:6%}}
 @container(max-width:500px){#panel[data-mode="title"]{padding:10px 14px!important}#panel[data-mode="title"] h2{font-size:20px!important;line-height:1.2;margin:5px 0!important}#panel[data-mode="title"] p{font-size:10px;line-height:1.4;margin:4px 0 8px}#introMark{gap:8px;font-size:8px}#introMark>span{font-size:11px}#introMark b{font-size:8px}.intro-route{display:none}.intro-controls{font-size:9px;margin:6px 0;gap:8px}kbd{padding:0 3px}#introDetails small{font-size:8px;margin-bottom:6px}#panel[data-mode="title"] button{font-size:10px;min-height:26px;padding:4px 9px}#panel[data-mode="title"][data-intro="b"]{grid-template-columns:42px 1fr;column-gap:12px}#panel[data-mode="title"][data-intro="b"] #introMark{padding-right:8px;gap:10px}#panel[data-mode="title"][data-intro="b"] #introMark>span{font-size:28px}#panel[data-mode="title"][data-intro="b"] #introMark>b{font-size:8px;letter-spacing:1px}#panel[data-mode="title"][data-intro="c"]{max-height:90%;left:5%;bottom:4%;max-width:90%}}
+
+/* Player-facing immersive shell: no release notes or development toolbar. */
+html,body{width:100%;height:100%;min-height:0;margin:0;padding:0;overflow:hidden;background:#0b1520;overscroll-behavior:none}
+#host{width:100%;height:100vh;height:100dvh;min-height:0;max-height:none;background:#0b1520}
+#host:fullscreen{height:100vh;height:100dvh;background:#0b1520}
+#gameActions{position:absolute;top:9%;right:2%;display:flex;gap:6px;z-index:4}
+#gameActions[hidden],#panel button[hidden],#loadNotice[hidden]{display:none!important}
+#gameActions button{width:34px;height:34px;padding:0;border:1px solid #b7b09699;border-radius:0;background:#17212bbd;color:#f0e3c8;font:20px system-ui,sans-serif;line-height:1}
+#gameActions button:hover,#gameActions button:focus-visible{background:#29272a;outline:2px solid #f0d59a;outline-offset:2px}
+#panel #continue{margin-left:12px;background:transparent;color:#f0e3c8;border-color:#a8a28d}
+#panel #restart{background:transparent;color:#f0e3c8;border-color:#8c8174}
+#loadNotice{position:fixed;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);max-width:90%;z-index:8;display:flex;align-items:center;gap:10px;padding:10px 14px;background:#29272af5;color:#f0e3c8;border:1px solid #8c8174;font:13px system-ui,sans-serif}
+#loadStatus{margin:0}#retryAssets{margin:0;white-space:nowrap}
+@container(max-width:700px){#gameActions button{width:30px;height:30px;font-size:18px}#panel #continue{margin-left:8px}}
+@container(max-width:500px){#gameActions{top:12%}#gameActions button{width:28px;height:28px}#panel #continue{margin-left:6px}}
