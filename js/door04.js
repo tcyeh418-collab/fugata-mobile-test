@@ -4,7 +4,7 @@ import {
   DOOR04_COMPLETION,
   DOOR04_REFERENCE_COMPLETION,
   DOOR04_STAGE_COMPLETION,
-  DOOR04_WRONG_HINTS,
+  door04WrongHint,
   startDialogue,
 } from "./dialogue.js";
 import { setMessage } from "./state.js?v=room04-movement-fixes-v6";
@@ -111,7 +111,7 @@ export function door04TestConsoleLabel(testEntryCount) {
 }
 
 export function handleDoor04Enter(state) {
-  if (isDoor04InputLocked(state)) { if(["preparing","testing"].includes(state.door04.status))setMessage(state,["請先停止序列，再拿放或試聽音匣。"],2.5,"testing"); return false; }
+  if (isDoor04InputLocked(state)) { if(["preparing","testing"].includes(state.door04.status))setMessage(state,["請先停止序列，再拿放或試聽音匣。"],2.5,"blocked"); return false; }
   const carried = heldDoor04Voice(state);
   if (
     carried
@@ -128,7 +128,7 @@ export function handleDoor04Enter(state) {
 }
 
 export function handleDoor04ListenOrTest(state, audio) {
-  if (isDoor04InputLocked(state)) { if(["preparing","testing"].includes(state.door04.status))setMessage(state,["請先停止序列，再拿放或試聽音匣。"],2.5,"testing"); return false; }
+  if (isDoor04InputLocked(state)) { if(["preparing","testing"].includes(state.door04.status))setMessage(state,["請先停止序列，再拿放或試聽音匣。"],2.5,"blocked"); return false; }
   if (nearDoor04Reference(state)) return controlDoor04Reference(state, audio);
   const held = heldDoor04Voice(state);
   if (held && allowedTarget(state,held,state.player)) return previewVoice(state, audio, held);
@@ -139,14 +139,14 @@ export function handleDoor04ListenOrTest(state, audio) {
   if (slottedVoice) return previewVoice(state, audio, slottedVoice);
   if (!nearDoor04Test(state)) return false;
   if (!state.door04.referenceCompleted) {
-    setMessage(state, ["請先完整聽完參考混音，再測試排列。", "現在可以拿放、試聽音匣；參考混音可暫停與繼續。"], 3, "door");
+    setMessage(state, ["請先完整聽完參考混音，再測試排列。", "現在可以拿放、試聽音匣；參考混音可暫停與繼續。"], 3, "blocked");
     return true;
   }
   const required = door04StageEntryCount(state);
   const ready = state.door04.slotAssignments
     .slice(0, required).every(Boolean);
   if (!required || !ready) {
-    setMessage(state, [`請先完成目前的「${stageLabel(state.door04.stage)}」。`, `測試前請填滿位置 1–${roman(required - 1)}。`], 2.5, "door");
+    setMessage(state, [`請先完成目前的「${stageLabel(state.door04.stage)}」。`, `測試前請填滿位置 1–${roman(required - 1)}。`], 2.5, "blocked");
     return true;
   }
   return beginDoor04Test(state, audio);
@@ -258,7 +258,7 @@ function handleSlotEnter(state, slot) {
   const door = state.door04;
   const required = door04StageEntryCount(state);
   if (slot.index >= required) {
-    setMessage(state, [`位置 ${roman(slot.index)} 尚未解鎖。`, `請先完成「${stageLabel(door.stage)}」。`], 2.2, "door");
+    setMessage(state, [`位置 ${roman(slot.index)} 尚未解鎖。`, `請先完成「${stageLabel(door.stage)}」。`], 2.2, "blocked");
     return true;
   }
   if (slot.index < door.confirmedEntryCount) {
@@ -367,7 +367,7 @@ function finishDoor04Test(state, audio) {
     slot.visualState = slot.index < door.confirmedEntryCount ? "correct-locked" : "rejected";
   }
   setMessage(state, [`「${stageLabel(door.stage)}」的進場順序仍與參考混音不同。`, "已確認的進場格保持鎖定；請調整其餘聲部。"], 3, "rejected");
-  const hint = DOOR04_WRONG_HINTS[door.wrongAttempts];
+  const hint = door04WrongHint(door.confirmedEntryCount);
   if (hint) startDialogue(state, `door04-wrong-${door.wrongAttempts}`, hint);
 }
 
@@ -412,7 +412,7 @@ function nearestWithin(state, entities, position = (entity) => entity) {
 function roman(index) { return String(index + 1); }
 
 export function cancelDoor04Carry(state) {
-  if(["preparing","testing"].includes(state.door04.status)){setMessage(state,["請先停止序列，再歸還音匣。"],2.5,"testing");return false;}
+  if(["preparing","testing"].includes(state.door04.status)){setMessage(state,["請先停止序列，再歸還音匣。"],2.5,"blocked");return false;}
   const voice = heldDoor04Voice(state);
   if (!voice) return false;
   Object.assign(voice, { currentLocation: "pedestal", isHeld: false, isPlaced: false,

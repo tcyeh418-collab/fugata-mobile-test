@@ -100,7 +100,7 @@ export const DOOR06_AUDIO_MANIFEST = Object.freeze({
   door06Complete: "assets/audio/fugata/door06_complete.mp3",
 });
 
-const FULL_TRACK_NAME = "fugata_full.wav";
+const FULL_TRACK_NAME = "fugata_full.mp3";
 const DOOR03_LOOP_CROSSFADE = 0.1;
 const DOOR03_LOOP_VOLUME = 0.72;
 

@@ -174,7 +174,7 @@ export function handleDoor05Enter(state) {
 
   const phaseId = state.door05.activePhaseId;
   if (isDoor05PhaseComplete(state, phaseId)) {
-    setMessage(state, ["這個階段已完成並鎖定。", "已完成的階段不能修改。"], 2, "door");
+    setMessage(state, ["這個階段已完成並鎖定。", "已完成的階段不能修改。"], 2, "blocked");
     return true;
   }
 
@@ -220,7 +220,7 @@ export function handleDoor05Listen(state, audio) {
   if (!terminal) return false;
 
   if (!isDoor05PhaseUnlocked(state, terminal.phaseId)) {
-    setMessage(state, ["請先完成前一階段。"], 2, "door");
+    setMessage(state, ["請先完成前一階段。"], 2, "blocked");
     return true;
   }
 
@@ -258,7 +258,7 @@ export function beginDoor05Test(state, audio) {
       state,
       ["請選擇三個主要重音位置。"],
       2.2,
-      "door",
+      "blocked",
     );
     return true;
   }
@@ -336,7 +336,7 @@ export function beginDoor05Launch(state, audio, now = door05NowSeconds()) {
     return true;
   }
   if (!door.finalLaunchReady) {
-    setMessage(state, ["需要完成三個節奏階段。"], 2, "door");
+    setMessage(state, ["需要完成三個節奏階段。"], 2, "blocked");
     return true;
   }
 

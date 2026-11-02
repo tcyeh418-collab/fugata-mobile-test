@@ -1,3 +1,5 @@
+import { isGameplayNarration } from './feedback-policy.js';
+
 export const INTRO_DIALOGUE = [
   { speaker: "Miss DJ Bear Beat", text: "{nickname}，你聽見了嗎？\n同一段旋律，\n正從不同方向靠近。" },
   { speaker: "Leroy", text: "像每個人走著不同的路，\n最後卻踩進\n同一個呼吸裡。" },
@@ -113,17 +115,13 @@ export const DOOR04_INTRO = [
   { speaker: "Miss DJ Bear Beat", text: "然後一次多加一個聲部。\n不是背答案，\n是看見音樂怎麼被編織起來。" },
 ];
 
-export const DOOR04_WRONG_HINTS = {
-  1: [
-    { speaker: "Miss DJ Bear Beat", text: "這兩個聲部能接在一起，\n但不是最早的先後順序。\n再找第一個出現的輪廓。" },
-  ],
-  2: [
-    { speaker: "Miss DJ Bear Beat", text: "前兩個位置已經正確。\n只比較剩下的聲部，\n聽誰第三個加入。" },
-  ],
-  3: [
-    { speaker: "Leroy", text: "前三個都已經坐好。\n剩下那位不要再躲了，\n位置就是你的。" },
-  ],
-};
+export function door04WrongHint(confirmedEntryCount) {
+  const confirmed = Math.max(0, Math.min(3, confirmedEntryCount));
+  const text = confirmed >= 3 ? '前三個位置已確認，只需比較最後加入的聲部。'
+    : confirmed >= 2 ? '前兩個位置已確認，請比較第三個加入的聲部。'
+    : '目前尚未確認前兩個位置，請重新比較最早加入的聲部。';
+  return [{ speaker: '系統', text }];
+}
 
 export const DOOR04_REFERENCE_COMPLETION = [
   { speaker: "Leroy", text: "好，四個都到齊了。\n現在回想一下——\n最先打開門的是誰？" },
@@ -218,10 +216,16 @@ export const DOOR06_STAGE_TRANSITION = [
 ];
 
 export function startDialogue(state, sequenceId, entries) {
+  // Gameplay explanations remain available in help, without stopping play.
+  if (isGameplayNarration(sequenceId)) {
+    state.ui.learningNote = { room: state.gameProgress.currentRoom, sequenceId, entries: entries.map(entry => ({ ...entry })) };
+    return false;
+  }
   state.dialogue.active = true;
   state.dialogue.sequenceId = sequenceId;
   state.dialogue.entries = entries.map((entry) => ({ ...entry }));
   state.dialogue.index = 0;
+  return true;
 }
 
 export function advanceDialogue(state) {

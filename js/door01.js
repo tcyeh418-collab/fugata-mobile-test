@@ -67,7 +67,7 @@ export function handleListenOrSubmit(state, audio, options = {}) {
   if (state.room01ThemeReplay.playing) {
     setMessage(
       state,
-      ["Fugata 主題仍在播放。", "請先回到左側留聲機停止，再試聽或提交旋律。"],
+      ["請先回到左側留聲機停止主題，再試聽或提交。"],
       2.8,
       "audio",
     );
@@ -110,7 +110,7 @@ function toggleThemeReplay(state, audio) {
   if (device.playing) {
     audio.stopRoom01Theme?.();
     device.playing = false;
-    setMessage(state, ["Fugata 主題已停止。", "再次播放會從頭開始。"], 2, "audio");
+    setMessage(state, ["Fugata 主題已停止。", "再次播放會從頭開始。"], 2, "preview");
     return true;
   }
 
@@ -121,7 +121,7 @@ function toggleThemeReplay(state, audio) {
     return true;
   }
   device.playing = true;
-  setMessage(state, ["Fugata 主題從頭播放中……", "回到留聲機按 E 可自行停止。"], 2.8, "audio");
+  setMessage(state, ["Fugata 主題從頭播放中……", "回到留聲機按 E 可自行停止。"], 2.8, "preview");
   return true;
 }
 
@@ -130,7 +130,7 @@ function submitAtDoor(state) {
   if (["checking", "rejected", "opening", "open"].includes(door.status)) return false;
   const fragment = heldFragment(state);
   if (!fragment) {
-    setMessage(state, ["門上的樂句主題訊號槽仍然是空的。", "請攜帶一個旋律片段。"], 2, "door");
+    setMessage(state, ["門上的樂句主題訊號槽仍然是空的。", "請攜帶一個旋律片段。"], 2, "blocked");
     return true;
   }
   door.status = "checking";

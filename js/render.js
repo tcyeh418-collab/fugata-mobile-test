@@ -246,27 +246,8 @@ export function createRenderer(canvas, options = {}) {
     if(!state.tutorialOpen && !externalRoomUiRooms.has(state.gameProgress.currentRoom)) {
       drawContextHint(state, cameraX);
     }
-    if (
-      state.gameProgress.currentRoom === 3
-      && !state.dialogue.active
-      && !externalRoomUiRooms.has(3)
-    ) {
-      drawRoom03StatusToast(state);
-    }
     if (state.dialogue.active && !externalRoomUiRooms.has(state.gameProgress.currentRoom)) {
       drawDialogue(state);
-    }
-    if (state.gameProgress.currentRoom === 6 && state.door06.status === "confirming") {
-      const selected = state.door06Memories.find(memory => memory.id === state.door06.selectedMemoryId);
-      context.save();
-      context.fillStyle = "rgba(4,7,11,.88)"; context.fillRect(0,0,960,640);
-      context.fillStyle = C.ink; context.fillRect(190,234,580,172);
-      context.strokeStyle = C.gold; context.strokeRect(190,234,580,172);
-      context.textAlign = "center"; context.fillStyle = C.warmGold; context.font = "bold 22px ui-sans-serif,system-ui";
-      context.fillText(`確認將「${selected?.displayLabel ?? "記憶片段"}」送回核心？`,480,285);
-      context.fillStyle = C.pale; context.font = "18px ui-sans-serif,system-ui";
-      context.fillText("Space — 確認送出",480,332);
-      context.fillText("Esc — 返回比較",480,370); context.restore();
     }
   }
 
@@ -2207,40 +2188,6 @@ export function createRenderer(canvas, options = {}) {
     const zone = ROOM01_DOORWAY.depthZone;
     if (state.player.y < zone.minY || state.player.y > zone.maxY) return 0;
     return clamp((state.player.x - zone.startX) / (zone.endX - zone.startX), 0, 1);
-  }
-
-  function drawRoom03StatusToast(state) {
-    const message = state.ui.message;
-    if (!message) return;
-    const kind = message.kind ?? "patch";
-    const lines = message.lines;
-    const rejected = kind === "rejected";
-    const success = kind === "success";
-    const border = rejected ? C.reject : success ? C.success : C.gold;
-    const width = 520;
-    const height = 24 + Math.min(2, lines.length) * 19;
-    const x = (canvas.width - width) / 2;
-    const y = 536 - height;
-    context.save();
-    context.globalAlpha = message.alpha ?? 1;
-    context.fillStyle = "rgba(5,9,12,.94)";
-    context.strokeStyle = border;
-    context.lineWidth = 1.2;
-    context.shadowBlur = rejected ? 18 : 10;
-    context.shadowColor = border;
-    roundedRect(context, x, y, width, height, 4);
-    context.fill();
-    context.stroke();
-    context.shadowBlur = 0;
-    context.textAlign = "center";
-    lines.slice(0, 2).forEach((line, index) => {
-      context.fillStyle = index === 0 ? border : "#efe2c5";
-      context.font = index === 0
-        ? "700 12px ui-sans-serif,system-ui"
-        : "500 11px ui-sans-serif,system-ui";
-      context.fillText(line, canvas.width / 2, y + 21 + index * 19);
-    });
-    context.restore();
   }
 
   function drawRoom03ControlStrip() {

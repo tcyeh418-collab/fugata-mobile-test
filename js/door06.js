@@ -81,7 +81,7 @@ export function handleDoor06Listen(state, audio) {
         state,
         [`下一個訊號是 ${expected?.displayName ?? "最終參考段落"}。`, "請依序沿著發光路徑前進。"],
         2.5,
-        "hint",
+        "blocked",
       );
       return true;
     }
@@ -108,7 +108,7 @@ export function handleDoor06Listen(state, audio) {
   }
   if (nearDoor06FinalReference(state)) {
     if (!door.finalReferenceUnlocked || !["final-reference", "memories"].includes(door.stage)) {
-      setMessage(state, ["請先依序完成五個核心繼電器。", "最終參考段落仍然鎖定。"], 2.4, "door");
+      setMessage(state, ["請先依序完成五個核心繼電器。", "最終參考段落仍然鎖定。"], 2.4, "blocked");
       return true;
     }
     const played = audio.playDoor06Preview?.(
@@ -126,7 +126,7 @@ export function handleDoor06Listen(state, audio) {
   const memory = nearestDoor06Memory(state);
   if (!memory) return false;
   if (!door06ReadyForAnswer(state)) {
-    setMessage(state, ["請先完整聆聽最終參考段落。", "記憶片段會在播放自然結束後解鎖。"], 2.6, "door");
+    setMessage(state, ["請先完整聆聽最終參考段落。", "記憶片段會在播放自然結束後解鎖。"], 2.6, "blocked");
     return true;
   }
   const played = audio.playDoor06Preview?.(memory.audioKey, memory.id, "memory") ?? false;
@@ -143,7 +143,7 @@ export function handleDoor06Enter(state, audio) {
   const memory = nearestDoor06Memory(state);
   if (!memory) return false;
   if (!door06ReadyForAnswer(state)) {
-    setMessage(state, ["記憶片段尚未解鎖。", "請先完成繼電器順序與最終參考段落。"], 2.5, "door");
+    setMessage(state, ["記憶片段尚未解鎖。", "請先完成繼電器順序與最終參考段落。"], 2.5, "blocked");
     return true;
   }
   audio.stopDoor06Preview?.();
@@ -151,7 +151,7 @@ export function handleDoor06Enter(state, audio) {
   door.status = "confirming";
   for (const item of state.door06Memories) item.isSelected = item.id === memory.id;
   memory.visualState = "selected";
-  setMessage(state, [`已選取 ${memory.displayLabel}`, "Space — 確認送回核心　Esc — 取消選取"], 30, "door");
+  state.ui.message = null; // One HTML confirmation owns selection feedback.
   return true;
 }
 
@@ -208,13 +208,6 @@ export function updateDoor06(state, deltaTime, audio) {
     door.stage = "final-reference";
     door.status = "reference-ready";
     door.idleElapsed = 0;
-  }
-  if (
-    ["relays", "final-reference", "memories"].includes(door.stage)
-    && !state.dialogue.active && !isDoor06InputLocked(state)
-  ) {
-    door.idleElapsed += deltaTime;
-    if (door.idleElapsed >= 10) showDoor06IdleHint(state);
   }
   if (door.status === "checking") {
     door.checkingRemaining = Math.max(0, door.checkingRemaining - deltaTime);
@@ -317,24 +310,6 @@ function resolveDoor06Memory(state, audio) {
   ], 4, "success");
 }
 
-function showDoor06IdleHint(state) {
-  const door = state.door06;
-  if (door.stage === "relays" && !door.idleHintShown.stage1) {
-    door.idleHintShown.stage1 = true;
-    setMessage(state, [
-      `下一個：${activeDoor06Relay(state)?.displayName ?? "最終參考段落"}`,
-      "沿著發光路徑找到目前的繼電器。",
-      "完整聆聽，讓訊號回到核心。",
-    ], 4, "hint");
-  } else if (door.stage === "final-reference" && !door.idleHintShown.stage2BeforeReference) {
-    door.idleHintShown.stage2BeforeReference = true;
-    setMessage(state, ["到中央終端完整聆聽最終參考段落。"], 4, "hint");
-  } else if (door.stage === "memories" && !door.idleHintShown.stage2AfterReference) {
-    door.idleHintShown.stage2AfterReference = true;
-    setMessage(state, ["按 E 比較三段記憶片段，按 Enter 選取，再按 Space 確認送回核心。"], 4, "hint");
-  }
-  door.idleElapsed = 0;
-}
 function resetIdleHint(door) { door.idleElapsed = 0; }
 function setDoor06AudioError(state, label) {
   state.audio.door06AssetsStatus = "Error";
