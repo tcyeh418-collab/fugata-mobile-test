@@ -1,9 +1,13 @@
+import { currentRoomAudioStatus } from './feedback-policy.js';
+import { createMemoryConfirmation } from './memory-confirmation.js';
 import {createRoomHelp} from "./room-help.js?v=hint-toggle-playtest-v1";
 import {createSequenceControls} from "./room04-controls.js?v=room04-movement-fixes-v6";
 import {createFullscreenTools} from "./fullscreen-tools.js";
 import {installPointerControls} from "./pointer-controls.js?v=room01-theme-replay-v1";
 import { backupBeforeWrite } from "./save-backups.js";
 import { controlDoor04Reference } from "./door04.js?v=room04-movement-fixes-v6";
+import { RELEASE } from './release.js';
+import { isolatedStorage, isolatedSessionStorage } from './test-storage.js';
 import {loadWalkArt,supportsWalk,walkCacheInfo,walkFrame} from './character/walk-v14.js';
 import {isTrialCharacter} from './character/trial-model.js';
 import { createCharacterCreator } from "./character/creator.js";
@@ -48,6 +52,16 @@ import {
 } from "./room-progress.js";
 import { roomCopy } from "./room-copy.js";
 import { createInitialState, heldFragment, setMessage } from "./state.js?v=room01-theme-replay-v1";
+import {
+  createLocalTestRoomState,
+  isLocalTestMode,
+  localTestNeedsFreshStorage,
+  requestedLocalEndingPreview,
+  requestedLocalRoom03GateState,
+  requestedLocalRoom04State,
+  requestedLocalTestRoom,
+  requestedLocalTransitionState,
+} from "./test-mode.js?v=room01-theme-replay-v1";
 import { createGameUi, setAudioNotice } from "./ui.js?v=room01-theme-replay-v1";
 import { updateGame } from "./update.js?v=room01-theme-replay-v1";
 
@@ -77,13 +91,13 @@ if (mobileRoom1Enabled) {
   mobileStyles.href = "mobile/room1.css?v=9";
   document.head.append(mobileStyles);
 }
-const localTestEnabled = false; // Public playtest package: no local QA routes.
-const autoTestRoom = null;
-const autoEndingPreview = false;
-const autoRoom03GateState = null;
-const autoRoom04State = null;
-const autoTransitionState = null;
-const freshLocalTestStorage = false;
+const localTestEnabled = isLocalTestMode(window.location);
+const autoTestRoom = requestedLocalTestRoom(window.location);
+const autoEndingPreview = requestedLocalEndingPreview(window.location);
+const autoRoom03GateState = requestedLocalRoom03GateState(window.location);
+const autoRoom04State = requestedLocalRoom04State(window.location);
+const autoTransitionState = requestedLocalTransitionState(window.location);
+const freshLocalTestStorage = localTestNeedsFreshStorage(window.location);
 const localTestingAvailable = false;
 const systemReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
 const localReducedMotion = localTestEnabled
@@ -127,9 +141,11 @@ if (!(canvas instanceof HTMLCanvasElement) || !(fullTrack instanceof HTMLAudioEl
 let storage;
 try { storage = window.localStorage; } catch { storage = {getItem:()=>null,setItem:()=>{throw new Error("Storage unavailable");},removeItem:()=>{}}; }
 const saveCheckEnabled=localTestEnabled && new URLSearchParams(location.search).get('savecheck')==='1';
+if (saveCheckEnabled) storage=isolatedSessionStorage(window.sessionStorage);
+else if (localTestEnabled) storage = isolatedStorage(storage, freshLocalTestStorage);
 const releaseLabel = document.createElement('p');
 releaseLabel.id = 'release-label';
-releaseLabel.textContent = 'Room 1–6 手機測試版｜正常遊玩：保存角色與進度';
+releaseLabel.textContent = `整合版 ${RELEASE.version}｜${localTestEnabled ? '測試模式：角色與進度不寫入正常存檔' : '正常遊玩：保存角色與進度'}`;
 const hubLink = document.createElement('a'); hubLink.href = 'test.html'; hubLink.textContent = '返回統一測試首頁';
 releaseLabel.append(' · ', hubLink);
 if (localTestingAvailable) document.body.prepend(releaseLabel);
@@ -193,8 +209,8 @@ window.addEventListener("keydown", (event) => {
 let lastSavedAt = 0;
 function persistProgress() {
   if (!hasEnteredGame || (localTestEnabled && !saveCheckEnabled) || !state.character || !["game", "character", "ending"].includes(state.phase)) return;
-  try { if (saveProgress(storage,state)) saveStatus.textContent = "進度已保存"; }
-  catch { saveStatus.textContent = "無法保存進度，請檢查瀏覽器本機儲存設定。"; }
+  try { if (saveProgress(storage,state)) {saveStatus.textContent = "進度已保存";state.ui.saveError=null;} }
+  catch { state.ui.saveError="無法保存進度，請檢查瀏覽器本機儲存設定。";saveStatus.textContent=state.ui.saveError; }
 }
 window.addEventListener("pagehide",()=>{persistProgress();audio.stopAll();});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)persistProgress();});
@@ -467,6 +483,7 @@ editCharacter.addEventListener("click",async ()=>{
 
 const roomHelp=createRoomHelp(()=>state,input,persistProgress,storage);
 const sequenceControls=createSequenceControls(()=>state,audio,input);
+const memoryConfirmation=createMemoryConfirmation(()=>state,audio,input,canvas);
 const pointerControls=installPointerControls(canvas,()=>state,input,{
   minimumCssHitSize: mobileRoom1Enabled ? 44 : 0,
 });
@@ -487,6 +504,7 @@ if (mobileRoom1Enabled) {
       canvas,
       gameScreen,
       getState: () => state,
+      toggleHints: () => roomHelp.toggleHints(),
     });
   }).catch((error) => console.error("[Fugata Mobile] Room 1 UI failed to initialize:", error));
 }
@@ -521,6 +539,8 @@ function frame(now) {
   editCharacter.title = editCharacter.disabled ? "請等目前的播放、測試或轉場完成" : "修改暱稱與外觀，保留目前進度";
   if (state.phase === "game" && now-lastSavedAt > 1000) { persistProgress(); lastSavedAt = now; }
   roomHelp.render(state);
+  memoryConfirmation.render(state);
+  refreshAudioNotice();
   sequenceControls.render(state);
   fullscreenTools.render(state);
   syncDiagnosticState();
@@ -804,20 +824,7 @@ function syncDiagnosticState() {
 }
 
 function refreshAudioNotice() {
-  const statuses = [
-    state.audio.fragmentAssetsStatus,
-    state.audio.door02AssetsStatus,
-    state.audio.successLoopStatus,
-    state.audio.door03AssetsStatus,
-    state.audio.door04AssetsStatus,
-    state.audio.door05AssetsStatus,
-    state.audio.door06AssetsStatus,
-  ];
-  if (statuses.includes("Error")) setAudioNotice(state, "Error");
-  else if (statuses.every((status) => status === "Ready" || status === "Partial")) {
-    setAudioNotice(state, "Ready");
-  }
-  else setAudioNotice(state, "Loading");
+  setAudioNotice(state, currentRoomAudioStatus(state));
 }
 
 function safeContextHintTarget(state) {
@@ -871,3 +878,9 @@ function audioStatusLabel(status) {
 
 animationFrameId = requestAnimationFrame(frame);
 
+// Explicit localhost-only QA driver; regular players never load it.
+if (localTestEnabled && new URLSearchParams(location.search).get('qa') === '1') {
+  import('./playthrough-check.js').then(({installPlaythroughCheck}) => installPlaythroughCheck({snapshot:()=>structuredClone(state),resumeAudio:()=>audio.resume()}));
+}
+
+if(saveCheckEnabled) import("./save-check.js").then(({installSaveCheck})=>installSaveCheck(storage,()=>structuredClone(state)));

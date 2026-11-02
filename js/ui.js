@@ -1,4 +1,5 @@
 import {allowedTarget} from "./interaction-targets.js?v=room01-theme-replay-v1";
+import { feedbackMessage, hintsEnabled } from './feedback-policy.js';
 import { isNearDoor, isNearThemeReplayDevice, nearestPedestal } from "./door01.js?v=room01-theme-replay-v1";
 import { nearestEchoTower, nearestSubjectTerminal } from "./door02.js";
 import {
@@ -43,52 +44,15 @@ const NOTICE_FADE_DURATION = 0.7;
 
 export function updateInteractionHint(state, deltaTime, interactionPerformed = false) {
   const hint = state.ui.contextHint;
-
-  if (state.dialogue.active) {
+  if (state.dialogue.active || state.tutorialOpen || !hintsEnabled(state)) {
     resetContextHint(hint);
     return;
   }
-
   const target = interactionTarget(state);
-  if (!target) {
-    resetContextHint(hint);
-    return;
-  }
-
-  if (hint.signature !== target.signature) {
-    hint.targetId = target.targetId;
-    hint.signature = target.signature;
-    hint.lines = target.lines;
-    hint.anchor = target.anchor;
-    hint.elapsed = Math.min(deltaTime, hint.holdDuration + hint.fadeDuration);
-    hint.alpha = Math.min(1, hint.elapsed / 0.14);
-    hint.visible = true;
-    hint.compactVisible = false;
-    return;
-  }
-
-  hint.anchor = target.anchor;
-  hint.lines = target.lines;
-
-  if (interactionPerformed) {
-    hint.elapsed = hint.holdDuration + hint.fadeDuration;
-    hint.alpha = 0;
-    hint.visible = false;
-    hint.compactVisible = true;
-    return;
-  }
-
-  const totalDuration = hint.holdDuration + hint.fadeDuration;
-  hint.elapsed = Math.min(totalDuration, hint.elapsed + deltaTime);
-  if (hint.elapsed < 0.14) {
-    hint.alpha = hint.elapsed / 0.14;
-  } else if (hint.elapsed <= hint.holdDuration) {
-    hint.alpha = 1;
-  } else {
-    hint.alpha = Math.max(0, 1 - (hint.elapsed - hint.holdDuration) / hint.fadeDuration);
-  }
-  hint.visible = hint.alpha > 0;
-  hint.compactVisible = hint.elapsed >= totalDuration;
+  if (!target) { resetContextHint(hint); return; }
+  Object.assign(hint, { targetId: target.targetId, signature: target.signature,
+    lines: target.lines, anchor: target.anchor, elapsed: 3, alpha: 0,
+    visible: false, compactVisible: true });
 }
 
 export function setAudioNotice(state, status) {
@@ -175,7 +139,7 @@ export function createGameUi(elements) {
       statusDoor.textContent = `${roomCopy(5).action}｜${formatStatus(state.door05.status)} · ${phase.displayName}階段 · 已選 ${selected}／3 · 已確認 ${confirmed}／3 · 完成 ${completed}／3${testProgress}`;
     } else {
       if (state.door06.status === "confirming") {
-        statusDoor.textContent = "記憶已選取 · Space 確認／Esc 返回比較";
+        statusDoor.textContent = "等待記憶確認";
       } else if (state.door06.stage === "relays" || state.door06.stage === "relay-transition") {
         statusDoor.textContent = `${roomCopy(6).action}｜步驟 1／3 · 核心訊號 ${state.door06.activatedRelayCount}／5 · 依序回復訊號`;
       } else if (state.door06.stage === "final-reference") {
@@ -619,7 +583,7 @@ function resetContextHint(hint) {
 
 function renderAudioNotice(state, element) {
   const notice = state.ui.audioNotice;
-  const shouldShow = notice.alpha > 0 && ["Loading", "Ready", "Error"].includes(notice.status);
+  const shouldShow = false; // Essential audio errors share the single feedback region.
   element.hidden = !shouldShow;
   element.textContent = {
     Loading: "音訊載入中",
@@ -631,7 +595,7 @@ function renderAudioNotice(state, element) {
 }
 
 function renderGameplayFeedback(state, element) {
-  const message = state.ui.message;
+  const message = feedbackMessage(state);
   element.hidden = !message;
   element.textContent = message?.lines.join("  ·  ") ?? "";
   element.dataset.kind = message?.kind ?? "status";
@@ -641,8 +605,8 @@ function renderGameplayFeedback(state, element) {
 function renderCompletionMarker(state, element) {
   if (!element) return;
   const marker = state.ui.completionMarker;
-  element.hidden = !marker;
-  if (!marker) return;
+  element.hidden = !marker || !hintsEnabled(state);
+  if (!marker || !hintsEnabled(state)) return;
   element.querySelector("small").textContent = marker.progress;
   element.querySelector("strong").textContent = marker.title;
   element.style.opacity = String(marker.alpha);
@@ -653,7 +617,7 @@ function renderRoomSummary(state, element) {
   const room = state.gameProgress.currentRoom;
   const supportedRoom = room >= 1 && room <= 6;
   element.hidden = !(
-    remaining > 0
+    hintsEnabled(state) && remaining > 0
     && supportedRoom
     && !state.dialogue.active
   );

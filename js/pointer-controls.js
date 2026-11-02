@@ -1,5 +1,4 @@
 import {targets,reachable,selectedTarget,cycleTarget} from './interaction-targets.js?v=room01-theme-replay-v1';
-import {setMessage} from './state.js?v=room01-theme-replay-v1';
 export function installPointerControls(canvas,getState,input,options={}){
  const panel=document.createElement('section');panel.className='interaction-panel';panel.setAttribute('aria-label','目前選取裝置');canvas.closest('.canvas-frame').after(panel);
  let signature='';
@@ -10,7 +9,7 @@ export function installPointerControls(canvas,getState,input,options={}){
  canvas.addEventListener('click',event=>{
   const s=getState();if(blocked(s))return;const t=hit(event);if(!t)return;
   Object.assign(s.interaction??={},{selectedId:t.id,explicit:true});
-  if(!reachable(s,t)){setMessage(s,['請靠近',t.name+'：請沿走道靠近裝置前方。'],3,'interaction');return;}
+  if(!reachable(s,t))return;
   if(t.actions.length===1)input.queueAction(t.id,t.actions[0].code);
  });
  canvas.addEventListener('keydown',event=>{if(event.code==='KeyQ'&&!event.repeat&&!blocked(getState())){event.preventDefault();cycleTarget(getState());}});
@@ -20,9 +19,8 @@ export function installPointerControls(canvas,getState,input,options={}){
   if(!selected&&!hover){panel.hidden=true;signature='';return;}
   const busy=s.gameProgress.currentRoom===4&&['preparing','testing'].includes(s.door04.status);
   const next=JSON.stringify([selected?.id,selected?.name,selected?.actions,selected&&reachable(s,selected),hover?.id,hover&&reachable(s,hover),busy]);if(next===signature)return;signature=next;panel.replaceChildren();
-  const activeTarget=selected||hover;const heading=document.createElement('strong');heading.textContent=`${activeTarget.name}${reachable(s,activeTarget)?'':'｜請靠近'}`;panel.append(heading);
-  if(hover&&hover.id!==selected?.id){const hint=document.createElement('span');hint.textContent=`指向：${hover.name}｜${hover.actions.map(a=>a.label).join('／')}${reachable(s,hover)?'':'｜請靠近'}`;panel.append(hint);}
-  for(const a of selected?.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=a.label;button.disabled=busy;button.onclick=()=>{input.queueAction(selected.id,a.code);canvas.focus({preventScroll:true});};panel.append(button);}
-  if(busy){const hint=document.createElement('small');hint.textContent='序列播放中：可走動；請先停止再拿放或試聽。';panel.append(hint);}
+  const activeTarget=s.interaction?.explicit&&selected?selected:hover||selected;const heading=document.createElement('strong');heading.textContent=`${activeTarget.name}${reachable(s,activeTarget)?'':'｜請靠近'}`;panel.append(heading);
+  for(const a of activeTarget?.actions||[]){const button=document.createElement('button');button.type='button';button.textContent=a.label;button.disabled=busy;button.onclick=()=>{input.queueAction(activeTarget.id,a.code);canvas.focus({preventScroll:true});};panel.append(button);}
+
  },element:panel};
 }

@@ -1,3 +1,4 @@
+import { isGameplayNarration } from './feedback-policy.js';
 import { restoreDoor04Ownership } from './door04.js?v=room04-movement-fixes-v6';
 import { backupBeforeWrite } from './save-backups.js';
 import { ROOM05_LANDMARKS } from './room05-art.js';
@@ -25,8 +26,8 @@ export function progressSnapshot(state) {
  d6.relayPlaybackStatus='idle';d6.playingRelayId=null;d6.finalReferencePlaying=false;
  for(const key of ['fragments','echoTowers','door03Modules','door04Capsules','door06Relays','door06Memories'])for(const item of data[key]){if('isPlaying'in item)item.isPlaying=false;if('playing'in item)item.playing=false;if('isInspecting'in item)item.isInspecting=false;}
  for(const room of [2,3,4,5,6]){const door=data[`door0${room}`];if(door?.completed)door.completionDialogueShown=true;}
- if(data.dialogue.active&&/^door0[2-6]-completion$/.test(data.dialogue.sequenceId??''))data.dialogue={...createInitialState(()=>.5).dialogue};
- data.ui.message=null; data.ui.completionMarker=null; data.ui.contextHint={...createInitialState(()=>.5).ui.contextHint};
+ if(data.dialogue.active&&isGameplayNarration(data.dialogue.sequenceId??''))data.dialogue={...createInitialState(()=>.5).dialogue};
+ data.ui.message=null; data.ui.saveError=null; data.ui.hintsVisible=false; data.ui.completionMarker=null; data.ui.contextHint={...createInitialState(()=>.5).ui.contextHint};
  return {version:1,layout:'playthrough-v3',data};
 }
 export function saveProgress(storage,state) {

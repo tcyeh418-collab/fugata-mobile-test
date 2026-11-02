@@ -9,13 +9,5 @@
   "display": "standalone",
   "orientation": "any",
   "background_color": "#05070d",
-  "theme_color": "#080b0f",
-  "icons": [
-    {
-      "src": "../assets/images/logic_code_cover.jpg",
-      "sizes": "3000x3000",
-      "type": "image/jpeg",
-      "purpose": "any"
-    }
-  ]
+  "theme_color": "#080b0f"
 }

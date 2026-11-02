@@ -476,6 +476,9 @@ export function createInitialState(random = Math.random) {
       previewLevel: 0,
     },
     ui: {
+      hintsVisible: false,
+      saveError: null,
+      learningNote: null,
       message: null,
       completionMarker: null,
       reducedMotion: false,
@@ -563,6 +566,7 @@ export function setMessage(state, lines, duration = 2.2, kind = "status") {
   const room03Transient = state.gameProgress.currentRoom === 3;
   const resolvedDuration = room03Transient ? 1.5 : duration;
   state.ui.message = {
+    room: state.gameProgress.currentRoom,
     lines,
     remaining: resolvedDuration,
     duration: resolvedDuration,

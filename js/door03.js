@@ -42,7 +42,7 @@ export function handleDoor03Inspect(state, audio) {
 
   if (nearDoor03PatchMonitor(state)) {
     if (!door.currentStageAudioKey) {
-      setMessage(state, ["接線監聽器尚未取得聲音。", "請先找到振盪器。"], 2.2, "inspection");
+      setMessage(state, ["請先檢查振盪器，再使用接線監聽器。"], 2.2, "blocked");
       return true;
     }
     playDoor03Stage(
@@ -96,7 +96,7 @@ export function handleDoor03Enter(state, audio) {
   if (!door.oscillatorDiscovered) {
     const nearby = nearestDoor03Port(state);
     if (!nearby) return false;
-    setMessage(state, ["請先找到聲音來源：振盪器。", "靠近振盪器按 E 檢查。"], 2.4, "patch");
+    setMessage(state, ["請先找到聲音來源：振盪器。", "靠近振盪器按 E 檢查。"], 2.4, "blocked");
     return true;
   }
 
@@ -105,7 +105,7 @@ export function handleDoor03Enter(state, audio) {
 
   if (port.type === "output") {
     if (isPortConnected(state, port.id)) {
-      setMessage(state, ["這個輸出端口已完成永久接線。", "已完成的接線不能更換。"], 2, "patch");
+      setMessage(state, ["這個輸出端口已完成永久接線。", "已完成的接線不能更換。"], 2, "blocked");
       return true;
     }
     door.selectedOutputPortId = port.id;
@@ -117,7 +117,7 @@ export function handleDoor03Enter(state, audio) {
   }
 
   if (!door.selectedOutputPortId) {
-    setMessage(state, ["輸入端口不能作為接線起點。", "請先選擇一個輸出端口。"], 2.2, "patch");
+    setMessage(state, ["輸入端口不能作為接線起點。", "請先選擇一個輸出端口。"], 2.2, "blocked");
     return true;
   }
 
@@ -127,7 +127,7 @@ export function handleDoor03Enter(state, audio) {
     return false;
   }
   if (isPortConnected(state, port.id)) {
-    setMessage(state, ["這個輸入端口已完成永久接線。", "已完成的接線不能覆寫。"], 2.2, "patch");
+    setMessage(state, ["這個輸入端口已完成永久接線。", "已完成的接線不能覆寫。"], 2.2, "blocked");
     clearTemporaryCable(state);
     return true;
   }

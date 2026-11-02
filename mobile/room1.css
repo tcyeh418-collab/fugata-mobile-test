@@ -662,3 +662,24 @@ html.mobile-room1.mobile-room1-ending .ending-actions {
   .mobile-virtual-joystick,
   .mobile-action-diamond > button { transition: none; }
 }
+
+/* One feedback region on touch devices, placed away from the top-row devices. */
+html.mobile-room1 .interaction-panel { display: none !important; }
+.mobile-room1-feedback {
+  top: auto; bottom: 8px; left: 10px; transform: none;
+  width: min(440px, calc(100% - 200px)); max-width: none;
+  max-height: 30dvh; overflow: auto; white-space: normal;
+  text-overflow: clip; overflow-wrap: anywhere; text-align: left;
+  font-size: 15px; line-height: 1.4;
+}
+.mobile-room1-hints {
+  min-width: 44px; min-height: 44px; padding: 4px 6px;
+  background: #171a24; color: #c7bdab; border: 1px solid #75613e;
+  border-radius: 5px; font: inherit; font-size: 14px;
+}
+.mobile-room1-hints[aria-pressed="true"] { color: #ffe3a9; border-color: #e4ad45; }
+.mobile-room1-hints:focus-visible { outline: 3px solid #ffe3a9; }
+html.mobile-room1 .memory-confirmation { width: min(420px, calc(100vw - 24px)); }
+.mobile-room1-stage[data-confirming="true"] .mobile-action-diamond,
+.mobile-room1-stage[data-confirming="true"] .mobile-room1-carry { visibility: hidden; }
+.mobile-room1-feedback { pointer-events: none; }
