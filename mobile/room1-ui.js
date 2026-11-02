@@ -1,3 +1,4 @@
+import { feedbackMessage, hintsEnabled } from '../js/feedback-policy.js';
 import { currentDialogueEntry } from "../js/dialogue.js";
 import { isNearDoor } from "../js/door01.js?v=room01-theme-replay-v1";
 import { door03PortById } from "../js/door03.js";
@@ -223,7 +224,7 @@ function installVirtualJoystick({ canvas, stage, zone, joystick, knob }) {
   return { stop: stopJoystick };
 }
 
-export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
+export function installMobileRoom1Ui({ canvas, gameScreen, getState, toggleHints }) {
   installMobileMetadata();
   const frame = canvas.closest(".canvas-frame");
   const characterScreen = document.querySelector("#character-screen");
@@ -264,7 +265,10 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   const fullscreenStatus = element("p", "mobile-room1-fullscreen-status");
   fullscreenStatus.hidden = true;
   fullscreenStatus.setAttribute("role", "status");
-  toolbar.append(help, fullscreen);
+  const hintToggle=element('button','mobile-room1-hints','提示');
+  hintToggle.type='button';hintToggle.setAttribute('aria-label','顯示提示');hintToggle.setAttribute('aria-pressed','false');
+  hintToggle.onclick=()=>toggleHints?.();
+  toolbar.append(hintToggle, help, fullscreen);
   hud.append(identity, objective, carry, toolbar, fullscreenStatus);
 
   const feedback = element("p", "mobile-room1-feedback");
@@ -340,7 +344,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   function updateHelpCopy(state = getState()) {
     const dialog = document.querySelector(".room-help-dialog");
     if (!dialog) return;
-    const items = dialog.querySelectorAll("li");
+    const list = dialog.querySelector("ol");
     const room = state.gameProgress.currentRoom;
     const copy = room === 6 ? [
       "依發光順序靠近五個繼電器，按「聆聽訊號」並完整播放，逐一讓訊號回到核心。",
@@ -365,11 +369,12 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       "再到四座回應塔按「聆聽」比較；使用「連接／確認」送往出口。",
       "答對後使用左側搖桿，走向右側已開啟的門洞。",
     ] : [
-      "先到五座星核裝置，使用右側「聆聽」或點選裝置後試聽，比較旋律。",
+      "左側留聲機可重播完整主題，再按「聆聽」停止；停止後再比較星核片段。",
+      "靠近五座星核裝置，使用右側「聆聽」比較旋律。",
       "使用「拿取／確認」拿取或交換片段；拿取後仍可按「聆聽」重播。",
       "帶到右側主題之門，右側按鈕會改為「提交」；完成後走向右側出口。",
     ];
-    items.forEach((item, index) => { if (copy[index]) item.textContent = copy[index]; });
+    list.replaceChildren(...copy.map(text=>element("li", "", text)));
     const paragraph = dialog.querySelector("p");
     if (paragraph) paragraph.textContent = "左側按住並拖曳移動；快速點選場景裝置，再從右側選擇動作。";
   }
@@ -397,6 +402,8 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
   let signature = "";
   function render(state = getState()) {
     const active = syncPresentation(state);
+    hintToggle.setAttribute("aria-pressed",String(hintsEnabled(state)));
+    hintToggle.setAttribute("aria-label",hintsEnabled(state)?"隱藏提示":"顯示提示");
     if (!active) return;
 
     const heading = interactionPanel.querySelector("strong");
@@ -454,6 +461,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
     const room6Memory = room6 ? nearestDoor06Memory(state) : null;
     const room6Ready = room6 && door06ReadyForAnswer(state);
     const room6Confirming = room6 && state.door06.status === "confirming";
+    stage.dataset.confirming = String(Boolean(room6Confirming));
     const room6Busy = room6 && [
       "relay-playing", "relay-replay", "reference-playing", "stage-transition",
       "checking", "rejected", "reconstructing", "opening", "open",
@@ -618,8 +626,8 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       state.door06.finalReferenceCompleted,
       state.door06.selectedMemoryId,
       state.door06.completed,
-      state.ui.message?.lines,
-      state.ui.message?.kind,
+      feedbackMessage(state),
+      state.ui.hintsVisible,
       entry?.speaker,
       entry?.text,
       state.dialogue.index,
@@ -643,7 +651,7 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
       carry.textContent = state.door06.completed
         ? "核心重構完成 · 前往右側出口"
         : state.door06.stage === "memories"
-          ? room6Confirming ? `已選：${room6Memory?.displayLabel ?? "記憶片段"} · 等待確認提交`
+          ? room6Confirming ? "等待確認"
             : `記憶：${state.door06.finalReferenceCompleted ? "已解鎖" : "鎖定"} · 錯誤 ${state.door06.wrongAttempts} 次`
           : state.door06.stage === "final-reference"
             ? `繼電器：5／5 · 最終參考${state.door06.finalReferenceCompleted ? "完成" : "待播放"}`
@@ -671,9 +679,10 @@ export function installMobileRoom1Ui({ canvas, gameScreen, getState }) {
     } else {
       carry.textContent = `攜帶：${fragment?.displayLabel ?? "無"}`;
     }
-    feedback.hidden = !state.ui.message;
-    feedback.dataset.kind = state.ui.message?.kind ?? "status";
-    feedback.textContent = state.ui.message?.lines.join(" · ") ?? "";
+    const notice=feedbackMessage(state);
+    feedback.hidden=!notice;
+    feedback.dataset.kind=notice?.kind??'status';
+    feedback.textContent=notice?.lines[0]??'';
 
     dialogue.hidden = !entry;
     if (entry) {
