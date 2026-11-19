@@ -1,0 +1,49 @@
+/* Scoped adaptation of the approved card-collection-v3 UI. Shared by cards 1, 2 and 3. */
+.art-award-overlay{position:absolute;inset:0;z-index:8;display:grid;place-items:center;padding:20px;background:#0e0d1399;font-family:StudioPixel,monospace;color:#f0e3c8}
+.art-award-overlay[hidden]{display:none!important}
+.award-panel{position:relative;box-sizing:border-box;width:min(800px,100%);max-height:96%;overflow:auto;padding:28px 32px 26px;background:#29272a;border:4px solid #8c8174;box-shadow:0 4px 0 #0e0d13,4px 0 0 #0e0d13,-4px 0 0 #0e0d13,0 -4px 0 #0e0d13,4px 8px 0 #0e0d13,inset 0 4px 0 #4a4543,inset 0 -4px 0 #1a191e;line-height:1.5;clip-path:polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px)}
+.award-panel:before,.award-panel:after{content:'';position:absolute;width:6px;height:6px;top:10px;background:#998d7a;box-shadow:2px 2px #0e0d13}.award-panel:before{left:10px}.award-panel:after{right:10px}
+.award-eyebrow{display:block;text-align:left;font-size:12px;color:#c3b7aa;border-bottom:2px solid #998d7a;padding-bottom:14px}
+.award-content{display:grid;grid-template-columns:300px 1fr;gap:32px;align-items:center;margin:24px 0}
+.award-album{height:264px;width:300px;position:relative;display:flex;align-items:center}
+.award-disc{position:absolute;right:2px;top:20px;width:224px;height:224px;background:repeating-radial-gradient(circle,#18171c 0 6px,#343136 7px,#18171c 9px);clip-path:polygon(28% 0,72% 0,72% 4%,84% 4%,84% 12%,92% 12%,92% 24%,100% 24%,100% 76%,92% 76%,92% 88%,84% 88%,84% 96%,72% 96%,72% 100%,28% 100%,28% 96%,16% 96%,16% 88%,8% 88%,8% 76%,0 76%,0 24%,8% 24%,8% 12%,16% 12%,16% 4%,28% 4%)}
+.award-disc:before{content:'';position:absolute;inset:82px;background:var(--award-accent);border:8px solid var(--award-edge)}.award-disc:after{content:'';position:absolute;inset:108px;background:#17151b}
+.award-jacket{position:relative;width:256px;height:256px;background:var(--award-paper);border:4px solid var(--award-edge);box-shadow:4px 4px #141318;z-index:1;flex:none;padding:16px}
+.award-jacket:before,.award-jacket:after{content:'';position:absolute;z-index:2;pointer-events:none}.award-jacket:before{left:0;top:0;bottom:0;width:10px;background:var(--award-accent);border-right:2px solid #29272a55}.award-jacket:after{inset:5px;border:1px solid var(--award-edge)}
+.award-art{display:block;width:100%;height:100%;object-fit:contain;background:#eee6cf;image-rendering:auto}.award-brand{position:absolute;top:26px;left:24px;right:24px;text-align:center;color:#765341;font-size:13px;line-height:1.4}.award-brand small{display:block;color:#b69950;font-size:7px}
+.award-number{position:absolute;right:10px;bottom:8px;color:#f0e3c8;background:var(--award-accent);font-size:12px;z-index:3;min-width:24px;padding:4px;text-align:center;box-shadow:2px 2px #29272a}
+.edition-3 .award-jacket{padding:28px}.edition-3 .award-jacket:before{inset:8px;width:auto;border:1px solid var(--award-accent);background:none}.edition-3 .award-jacket:after{inset:14px;border:1px solid var(--award-accent)}.edition-3 .award-brand{top:36px}
+.award-copy h2{font:400 32px/1.3 StudioPixel,monospace;margin:0;color:#f0e3c8;letter-spacing:0;text-align:left}.award-edition{display:block;color:#c3b7aa;font-size:12px;margin:12px 0 24px;line-height:2}.award-count{display:inline-block;background:#1b191e;border:2px solid #8c8174;box-shadow:inset 2px 2px #0e0d13;font:24px/1.4 StudioPixel,monospace;padding:8px 16px;margin:0!important;color:#eddbc0}.award-state{font-size:12px;margin:12px 0 4px;color:#c3b7aa}.award-note{display:block;font-size:10px;color:#c3b7aa}
+.award-actions{border-top:2px solid #998d7a;padding-top:20px;display:flex;justify-content:flex-end}.award-actions button.primary{font:24px/1.2 StudioPixel,monospace;letter-spacing:0;color:#0e0d13;background:#f0d59a;border:2px solid #f0e3c8;border-radius:0;box-shadow:4px 4px #0e0d13;min-width:220px;margin:0;padding:12px 18px}.award-actions button.primary:hover{background:#f5e0b5}.award-actions button:focus-visible{outline:2px solid #f0d59a;outline-offset:4px}
+.award-original-state{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap}.award-fallback{width:100%;height:100%;display:grid;place-items:center;background:#eee6cf;color:#765341;text-align:center;font-size:18px}.award-fallback[hidden]{display:none}
+@container(max-width:750px){.award-content{grid-template-columns:1fr;gap:12px;margin:14px 0;text-align:center}.award-album{width:210px;height:180px;margin:auto}.award-jacket{width:176px;height:176px;padding:12px}.award-disc{width:160px;height:160px;top:10px;right:0}.award-disc:before{inset:60px;border-width:6px}.award-disc:after{inset:77px}.award-brand{top:20px;font-size:10px}.award-brand small{font-size:5px}.award-number{font-size:9px;padding:3px;right:7px;bottom:5px}.edition-3 .award-jacket{padding:21px}.edition-3 .award-jacket:before{inset:6px}.edition-3 .award-jacket:after{inset:12px}.edition-3 .award-brand{top:28px}.award-copy h2{font-size:24px;text-align:center}.award-edition{font-size:9px;margin:6px 0 10px}.award-count{font-size:18px;padding:4px 12px}.award-state{font-size:10px;margin:6px 0}.award-note{font-size:9px}.award-panel{padding:24px 18px 20px}.award-eyebrow{font-size:9px;padding-bottom:12px}.award-actions{padding-top:16px}.award-actions button.primary{min-width:0;width:100%;font-size:21px}.art-award-overlay{padding:14px}}
+/* Override legacy Secret Room selectors without changing other cards. */
+#secretClear.art-award-overlay h2,#advancedClear.art-award-overlay h2{font-size:32px;margin:0}
+#secretClear.art-award-overlay .award-count,#advancedClear.art-award-overlay .award-count{font-size:24px}
+#secretClear.art-award-overlay .primary,#advancedClear.art-award-overlay .primary{margin-top:0}
+.edition-3 .award-brand{top:30px;font-size:12px;line-height:1.15}
+@container(max-width:750px){
+ .award-panel{padding:16px 14px 14px}.award-content{gap:6px;margin:10px 0}.award-eyebrow{padding-bottom:9px}
+ .award-album{width:158px;height:126px}.award-jacket{width:120px;height:120px;padding:9px;border-width:3px}.award-jacket:before{width:5px}.award-jacket:after{inset:4px}
+ .award-disc{width:110px;height:110px;top:7px;right:2px}.award-disc:before{inset:40px;border-width:4px}.award-disc:after{inset:52px}
+ .award-brand{top:13px;left:12px;right:12px;font-size:7px;line-height:1.15}.award-brand small{font-size:4px}.award-number{font-size:7px;right:5px;bottom:4px;min-width:16px;padding:2px}
+ .edition-3 .award-jacket{padding:14px}.edition-3 .award-jacket:before{inset:4px}.edition-3 .award-jacket:after{inset:8px}.edition-3 .award-brand{top:15px;font-size:7px}
+ #secretClear.art-award-overlay h2,#advancedClear.art-award-overlay h2{font-size:20px}
+ #secretClear.art-award-overlay .award-count,#advancedClear.art-award-overlay .award-count{font-size:16px;padding:2px 10px}
+ .award-edition{margin:4px 0 6px;font-size:9px}.award-state{margin:5px 0 2px;font-size:9px}.award-note{font-size:8px}.award-actions{padding-top:10px}.award-actions button.primary{font-size:18px;padding:9px 12px}
+}
+
+/* Compact awards must keep the return action visible in the mobile game viewport. */
+@container(max-width:750px){
+ .award-panel{padding:12px 14px}.award-content{gap:4px;margin:8px 0}.award-eyebrow{padding-bottom:6px}
+ .award-album{height:110px;width:144px}.award-jacket{width:104px;height:104px}
+ .award-disc{width:98px;height:98px;top:5px}.award-disc:before{inset:35px}.award-disc:after{inset:46px}
+ #secretClear.art-award-overlay h2,#advancedClear.art-award-overlay h2{font-size:18px;line-height:1.25}
+ #secretClear.art-award-overlay .award-state,#advancedClear.art-award-overlay .award-state{font-size:9px;line-height:1.3;margin:4px 0 2px}
+ .award-note{font-size:8px;line-height:1.3}.award-actions{padding-top:8px}
+}
+
+/* Approved character covers: no printed brand over faces. Card2 copper corner tabs. */
+.edition-2 .award-jacket{padding:24px}.edition-2 .award-jacket:before{width:auto;height:auto;inset:6px;border:0;background:linear-gradient(var(--award-accent),var(--award-accent)) left top/18px 4px no-repeat,linear-gradient(var(--award-accent),var(--award-accent)) left top/4px 18px no-repeat,linear-gradient(var(--award-accent),var(--award-accent)) right bottom/18px 4px no-repeat,linear-gradient(var(--award-accent),var(--award-accent)) right bottom/4px 18px no-repeat}.edition-2 .award-jacket:after{inset:14px;border:1px solid #72817c}
+#card3.art-award-overlay h2{font-size:32px;margin:0}#card3.art-award-overlay .award-count{font-size:24px}#card3.art-award-overlay .primary{margin-top:0}
+@container(max-width:750px){.edition-2 .award-jacket{padding:14px}.edition-2 .award-jacket:after{inset:8px}#card3.art-award-overlay h2{font-size:18px;line-height:1.25}#card3.art-award-overlay .award-count{font-size:16px;padding:2px 10px}#card3.art-award-overlay .award-state{font-size:9px;line-height:1.3;margin:4px 0 2px}}

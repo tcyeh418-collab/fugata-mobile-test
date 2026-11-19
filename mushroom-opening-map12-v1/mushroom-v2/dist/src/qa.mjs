@@ -1,0 +1,101 @@
+// Development fixtures only, loaded by ?qa=1. Progress is isolated by the app's .qa namespace.
+import {CHECKPOINTS,FINISH} from './map2.mjs?rev=map5-20261020-r1';
+export function attachQA(api){
+ const bar=document.createElement('aside');bar.setAttribute('aria-label','QA fixtures');bar.style.cssText='position:fixed;bottom:32px;left:0;right:0;z-index:99;background:#17383ef0;padding:4px;display:flex;gap:6px;overflow:auto;font:9px monospace';
+ const status=document.createElement('output');status.id='qaStatus';status.style.cssText='position:fixed;right:5px;top:4px;z-index:98;max-width:55vw;background:#15343bd9;color:#d1c7a5;font:8px monospace;pointer-events:none;word-break:break-all';
+ const make=(label,fn)=>{const b=document.createElement('button');b.textContent=label;b.style.cssText='white-space:nowrap;font:9px monospace;padding:3px';b.onclick=()=>{api.freeze(false);fn();};bar.append(b);};
+ function m2(x,y=590){api.startMap2();const g=api.getGame();g.teleport({x,y});g.safe={x:Math.min(x,37900),y:590};return g;}
+ function m3(x,y=590,giant=false){api.startMap3();const g=api.getGame();g.teleport({x,y});g.safe={x:x>19000?19000:180,y:590};if(x>14500)g.bearBeatEventCompleted=true;if(giant){g.bearBeatEventCompleted=true;g.isGiant=true;g.giantShield=1;}return g;}
+ function m4(x=180,y=590,{giant=false,reward=null}={}){api.store.data.runState={isGiant:giant,giantShield:giant?1:0,hp:3,bonusSpores:0,nextMapId:4};api.startMap4(false,true);const g=api.getGame();g.teleport({x,y});g.safe={x:x>33000?33000:x>20000?20000:180,y:590};if(reward!==null)g.random=()=>reward/5+.01;return g;}
+ window.addEventListener('keydown',e=>{if(e.code==='F2'){e.preventDefault();bar.hidden=!bar.hidden;status.hidden=bar.hidden;}});
+ function m5(x=180,y=590,{giant=false,reward=null,history={}}={}){api.store.data.runState={hp:3,isGiant:giant,giantShield:giant?1:0,bonusSpores:0,physicalSporeProgress:history,nextMapId:5};api.startMap5(false,true);const g=api.getGame();g.teleport({x,y});g.safe={x:x>23000?23000:x>10000?10000:180,y:590};if(reward!==null)g.random=()=>reward/5+.01;return g;}
+ // Ordinary-crate checks, independent of Art Card #2 and its permanent reward.
+ for(const [label,x,y,giant]of [['Normal A',15126,477,false],['Normal B',17750,471,false],['Giant Top',15126,477,true],['Giant Side',15070,590,true]])make(`QA Small Crate ${label}`,()=>{const g=m3(x,y,giant);if(y<590)g.player.grounded=false;});
+ // Local-only R2 event checkpoints. No fixture is included in a production build.
+ make('QA R2 Police',()=>{api.startMap1();const g=api.getGame();g.finishIntro();g.teleport({x:11540,y:590});});
+ make('QA R2 Police Active',()=>{api.startMap1();const g=api.getGame();g.finishIntro();g.teleport({x:11550,y:590});g.step(1/120);});
+ make('QA R2 Chest Normal',()=>{api.store.data.hasMushroomArtCard02=false;const g=m3(25575,210);g.player.grounded=false;});
+ make('QA R2 Chest Giant',()=>{api.store.data.hasMushroomArtCard02=false;const g=m3(25575,210,true);g.player.grounded=false;});
+ make('QA R2 Chest Deck',()=>{api.store.data.hasMushroomArtCard02=false;m3(25440,355);});
+ for(const [label,map,x]of [['Map4 Leroy',4,1000],['Map4 Bear',4,35400],['Map5 Leroy',5,600],['Map5 Bear',5,28000]])make(`QA R2 ${label}`,()=>map===4?m4(x-100):m5(x-100));
+ make('QA Opening Slow',()=>api.beginOpening({waitForReady:true}));
+ make('QA Map1 Ready',()=>api.releaseOpeningReady());
+ for(const tier of [1,2,3])make(`QA Story Tier ${tier}`,()=>{const count=tier===1?0:tier===2?12:20,g=m5(30120,590,{history:Object.fromEntries([1,2,3,4].map(id=>[id,{collected:count,total:20}]))});g.hasRescueKey=true;if(tier>1)g.spores.slice(0,tier===3?3:2).forEach(s=>s.collected=true);for(const id of ['01','02','03'])api.store.data[`hasMushroomArtCard${id}`]=false;api.store.data.advancedDanceCleared=false;api.store.capture(g);});
+ for(const [name,ids]of [['None',[]],['One',['01']],['One Three',['01','03']],['All',['01','02','03']]])make(`QA Story Cards ${name}`,()=>{for(const id of ['01','02','03']){api.store.data[`hasMushroomArtCard${id}`]=ids.includes(id);api.getGame()[`hasMushroomArtCard${id}`]=ids.includes(id);}api.store.data.advancedDanceCleared=ids.includes('03');api.store.save();api.refreshFinal();});
+ make('QA Finish Current Map',()=>{const g=api.getGame();if(g.mapId>4)return;g.spores.forEach(s=>s.collected=true);if(g.mapId===2){g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;}if(g.mapId===3)g.bearBeatEventCompleted=true;g.teleport({x:g.level.FINISH.x,y:590});g.step(1/120);});
+ make('QA Room Direct',()=>m5(30900));
+ make('QA Gantry',()=>m5(3050));
+ make('QA Pump Channel',()=>m5(13850));
+ make('QA Archive Roof',()=>m5(23150));
+ make('QA Offset Platforms',()=>m5(24900));
+ make('QA Split Viaduct',()=>m5(25980));
+ make('QA Lantern',()=>m5(28500));
+ make('QA Map5 Framing',()=>{m5();api.freeze(true);});
+ make('QA Map5 Moving High',()=>m5(1450));
+ make('QA Map5 Spikes Low',()=>m5(4200));
+ make('QA Map5 Falling Pit',()=>m5(6940));
+ make('QA Map5 Crusher Spikes',()=>m5(10400));
+ make('QA Map5 Falling High',()=>m5(14800));
+ make('QA Map5 Moving Low',()=>m5(18100));
+ for(const [i,name]of ['Drumsticks','Magnet','Spring','LIMIT','Capsule'].entries())make(`QA Supply ${name}`,()=>m5(12940,590,{giant:true,reward:i}));
+ make('QA Map5 Story',()=>{const g=m5(30120,590,{giant:true,history:Object.fromEntries([1,2,3,4].map(id=>[id,{collected:20,total:20}]))});g.player.hp=2;g.spores.forEach(s=>s.collected=true);g.bonusSpores=2;api.store.capture(g);});
+ for(const tier of [1,2,3])make(`QA Rescue Tier ${tier}`,()=>{const count=tier===1?0:tier===2?12:20,g=m5(30120,590,{history:Object.fromEntries([1,2,3,4].map(id=>[id,{collected:count,total:20}]))});g.lockDiscovered=true;g.hasRescueKey=true;g.bonusSpores=tier===3?3:tier===2?2:0;api.store.data.hasMushroomArtCard01=tier===3;api.store.data.hasMushroomArtCard02=tier!==1;api.store.data.hasMushroomArtCard03=tier===3;api.store.capture(g);});
+ make('QA Map5 Fall Keep Supply',()=>{const g=api.getGame();if(g.mapId!==5)return;g.invulnerable=0;g.fall();});
+ make('QA Hide' ,()=>{bar.hidden=true;status.hidden=true;});
+ make('QA Map4 Framing',()=>{m4();api.freeze(true);});
+ make('QA Spike',()=>m4(2130));
+ make('QA Giant Spike',()=>m4(2240,590,{giant:true}));
+ make('QA Falling Single',()=>m4(5540));
+ make('QA Falling Pair',()=>m4(7240));
+ for(const [i,name]of ['Drumsticks','Magnet','Kick Spring','LIMIT','Capsule'].entries())make(`QA Gacha ${name}`,()=>m4(12940,590,{giant:true,reward:i}));
+ make('QA Buff Spikes',()=>{const g=api.getGame();if(g.mapId!==4)return;g.teleport({x:2240,y:590});g.safe={x:180,y:590};g.time=4.2;g.invulnerable=0;});
+ make('QA Crusher',()=>m4(20680));
+ make('QA Spike Falling',()=>m4(22480));
+ make('QA Crusher Shot',()=>m4(24600,470));
+ make('QA Final Falling',()=>m4(29940));
+ make('QA Advanced Dance',()=>{api.store.data.hasMushroomArtCard03=false;api.store.data.advancedDanceCleared=false;const g=m4(36700,590,{giant:true});g.player.hp=2;g.map4GachaUsed=true;g.gachaReward='capsule';g.gachaRewardGranted=true;g.bonusSpores=2;g.buffs={drumsticks:15,magnet:16,kickSpring:17,limit:7};g.spores.slice(0,9).forEach(s=>s.collected=true);});
+ make('QA Map4 Perfect',()=>{const g=m4(37400,590,{giant:true});g.player.hp=2;g.spores.forEach(s=>s.collected=true);g.advancedDanceCleared=true;g.bonusSpores=2;g.buffs.magnet=12;g.step(1/120);});
+ make('QA Map4 Partial',()=>{const g=m4(37400);g.advancedDanceCleared=false;g.spores.slice(0,7).forEach(s=>s.collected=true);g.step(1/120);});
+ make('QA Settle Camera',()=>{const g=api.getGame();api.freeze(true);api.renderer.camera=Math.max(0,Math.min((g.level.worldWidth??36000)-api.renderer.canvas.width,g.player.x-api.renderer.canvas.width*.34));});
+ make('QA Giant Bear Photo',()=>{const g=m3(12950,590,true);api.freeze(true);api.renderer.camera=Math.max(0,Math.min(g.level.worldWidth-api.renderer.canvas.width,g.player.x-api.renderer.canvas.width*.34));});
+ make('QA Map3 Framing',()=>{m3(180);api.freeze(true);});
+ make('QA Map3 Low',()=>m3(3000));
+ make('QA Map3 High',()=>m3(6400));
+ make('QA Bear Beat',()=>m3(12920));
+ make('QA Giant Crate',()=>m3(15040,590,true));
+ make('QA Shield Hit',()=>m3(20000,590,true));
+ make('QA Shield Challenge',()=>m3(19000,590,true));
+ make('QA New Special Card',()=>{api.store.data.hasMushroomArtCard02=false;m3(25470,355,true);});
+ make('QA Special Chest',()=>m3(25470,355,true));
+ make('QA Normal Chest',()=>m3(25470,355,false));
+ make('QA Map3 Perfect',()=>{const g=m3(34300,590,true);g.spores.forEach(s=>s.collected=true);g.step(1/120);});
+ make('QA Map3 Normal Clear',()=>{const g=m3(34300);g.spores.slice(0,7).forEach(s=>s.collected=true);g.step(1/120);});
+ make('QA Map1 Framing',()=>{api.startMap1();api.getGame().finishIntro();api.freeze(true);});
+ make('QA Map2 Framing',()=>{m2(180);api.freeze(true);});
+ make('QA Map1 Clear',()=>{api.startMap1();const g=api.getGame();g.finishIntro();g.spores.slice(0,8).forEach(s=>s.collected=true);g.teleport({x:35300,y:590});g.step(1/120);});
+ make('QA Map1 Tower',()=>{api.startMap1();const g=api.getGame();g.finishIntro();g.teleport({x:1300,y:590});});
+ make('QA Map1 Skyline',()=>{api.startMap1();const g=api.getGame();g.finishIntro();g.teleport({x:12900,y:360});});
+ make('QA First Jump',()=>m2(950));
+ make('QA Section1 Upper',()=>m2(8450));
+ make('QA Gap 140',()=>m2(2300));
+ make('QA Gap 190',()=>m2(4700));
+ make('QA Gap 210',()=>m2(8000));
+ make('QA Projectile',()=>m2(5360));
+ make('QA Leroy',()=>{m2(11000);});
+ make('QA Sprint',()=>{const g=m2(11450);g.leroySeen=true;g.grantDrumsticks();});
+ make('QA Sprint Expiry',()=>{const g=m2(16000);g.leroySeen=true;g.drumsticksGranted=true;g.drumsticksRemaining=.1;});
+ make('QA Sprint Crown',()=>{const g=m2(16500,415);g.leroySeen=true;g.drumsticksGranted=true;g.drumsticksRemaining=20;});
+ make('QA Signal Bridge',()=>m2(2940));
+ make('QA Switchback',()=>m2(8400));
+ make('QA Tidal Piers',()=>{const g=m2(22250);g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;});
+ make('QA Bounce Roof',()=>{const g=m2(23500);g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;});
+ make('QA Chain Bridge',()=>{const g=m2(29250);g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;});
+ make('QA Checkpoint',()=>m2(10250));
+ make('QA Checkpoint B',()=>{const g=m2(21350);g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;});
+ make('QA Section3',()=>{const g=m2(22250);g.leroySeen=true;g.drumsticksGranted=true;g.checkpoint=CHECKPOINTS[1];});
+ make('QA New Beginner Card',()=>{api.store.data.hasMushroomArtCard01=false;const g=m2(36950);g.leroySeen=true;g.drumsticksGranted=true;g.sprintCleared=true;});
+ make('QA Secret',()=>{const g=m2(36950);g.leroySeen=true;g.drumsticksGranted=true;g.drumsticksRemaining=11;g.player.hp=2;g.checkpoint=CHECKPOINTS[1];g.spores.slice(0,8).forEach(s=>s.collected=true);});
+ make('QA Map2 Perfect',()=>{const g=m2(FINISH.x);g.leroySeen=true;g.drumsticksGranted=true;g.spores.forEach(s=>s.collected=true);g.step(1/120);});
+ make('QA Map2 Partial',()=>{const g=m2(FINISH.x);g.leroySeen=true;g.drumsticksGranted=true;g.spores.slice(0,7).forEach(s=>s.collected=true);g.step(1/120);});
+ document.body.append(status,bar);
+}

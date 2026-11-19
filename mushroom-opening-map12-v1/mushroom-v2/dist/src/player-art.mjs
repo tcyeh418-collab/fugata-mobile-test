@@ -1,0 +1,15 @@
+// Final red-cap/backpack design. Pure presentation: no physics, skill or save mutations.
+export const PLAYER_ART=Object.freeze({frame:64,frames:6,anchor:[32,64],scale:1,reference:'final red-cap/backpack turnaround 2026-10-27'});
+const atlas=typeof Image==='function'?new Image():null,walkAtlas=typeof Image==='function'?new Image():null;
+if(walkAtlas)walkAtlas.src=new URL('../assets/player-motion-v2/walk-sheet.png',import.meta.url).href;
+if(atlas)atlas.src=new URL('../assets/player-final-v1/player-sheet.png',import.meta.url).href;
+export function playerArtFrame(p,clock=0){if(!p.grounded)return(p.vy??0)<0?4:5;if(Math.abs(p.vx??0)>12)return 2+Math.floor(clock*8)%2;return 0;}
+// Per renderer/actor presentation phase. Repeated draws and direction flips do not advance it twice.
+const walkMotions=new WeakMap;
+export function playerWalkFrame(r,p,clock=r.clock??0){let actors=walkMotions.get(r);if(!actors){actors=new Map;walkMotions.set(r,actors);}const key=p.animationId??'main';let m=actors.get(key);if(!m){m={clock,phase:0};actors.set(key,m);}const dt=r.playerAnimationPaused?0:Math.max(0,Math.min(.05,clock-m.clock));if(clock<m.clock)m.phase=0;if(clock!==m.clock){if(p.grounded&&Math.abs(p.vx??0)>12)m.phase=(m.phase+Math.abs(p.vx)*dt/160)%1;m.clock=clock;}return Math.floor(m.phase*8)%8;}
+function fallback(c){const rect=(x,y,w,h,color)=>{c.fillStyle=color;c.fillRect(x,y,w,h)};
+rect(-21,-29,14,26,'#342218');rect(-20,-27,12,22,'#965122');rect(-19,-20,10,8,'#b56c2e');rect(-16,-18,4,4,'#e0aa40');rect(-15,-17,2,2,'#422d21');rect(-13,-33,28,30,'#342218');rect(-12,-31,25,27,'#f4c98b');rect(-17,-20,6,15,'#342218');rect(-16,-19,5,12,'#efbd81');rect(12,-20,6,15,'#342218');rect(12,-19,5,12,'#efbd81');rect(-12,-5,10,5,'#342218');rect(3,-5,10,5,'#342218');rect(-11,-5,8,4,'#efbd81');rect(4,-5,8,4,'#efbd81');rect(-8,-29,3,7,'#211e1c');rect(5,-29,3,7,'#211e1c');
+const rows=[[-10,-57,20,3],[-17,-54,34,3],[-22,-51,44,5],[-26,-46,52,7],[-28,-39,56,8],[-24,-31,48,4]];for(const[x,y,w,h]of rows)rect(x,y,w,h,'#2b1b1a');for(const[x,y,w,h]of rows)rect(x+2,y+1,w-4,h-1,y>=-39?'#b82c2a':'#ef3a2c');for(const[x,y,w,h]of[[-15,-48,7,6],[5,-53,7,4],[14,-43,7,6],[-22,-37,4,5],[-3,-43,3,3],[5,-34,3,3]])rect(x,y,w,h,'#ffe0a1');}
+export function drawMushroomPlayer(r,p,invulnerable){const c=r.c,x=p.x-r.camera,y=p.y;c.save();if(invulnerable&&Math.floor(r.clock*12)%2===0)c.globalAlpha*=.45;r.ellipse(x,y+1,21,4,'#102d3270');c.translate(Math.round(x),Math.round(y));if(p.facing<0)c.scale(-1,1);c.imageSmoothingEnabled=false;if(atlas?.complete&&atlas.naturalWidth){const walkFrame=playerWalkFrame(r,p,r.clock),walking=p.grounded&&Math.abs(p.vx??0)>12&&walkAtlas?.complete&&walkAtlas.naturalWidth;const frame=walking?walkFrame:playerArtFrame(p,r.clock);c.drawImage(walking?walkAtlas:atlas,frame*64,0,64,64,-32,-64,64,64);}else fallback(c);c.restore();}
+
+export function playerArtStatus(){return {loaded:!!(atlas?.complete&&atlas.naturalWidth),walkLoaded:!!(walkAtlas?.complete&&walkAtlas.naturalWidth),walkFrames:8,strideWorldPixels:160,...PLAYER_ART};}

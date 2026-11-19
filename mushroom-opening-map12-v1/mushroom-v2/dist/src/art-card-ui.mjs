@@ -1,0 +1,17 @@
+// Presentation only: never grants cards or writes storage.
+export const DANCE_ART_CARDS=Object.freeze({
+ 1:{host:'secretClear',message:'cardMessage',exit:'secretExit',title:'Secret Room Clear',edition:'120 BPM',number:'01',alt:'Leroy黑髮黑西裝，手持金色鼓棒的角色專輯封面',paper:'#dfd5bb',edge:'#bda88c',accent:'#9f4a3c'},
+ 2:{host:'card3',message:'card3Message',exit:'card3Close',title:'ART CARD #2',edition:'VOLTAGE',number:'02',alt:'Miss DJ Bear Beat黑捲髮、黑色無袖連身裝與Eurorack角色專輯封面',paper:'#304a51',edge:'#a47b54',accent:'#c18b51'},
+ 3:{host:'advancedClear',message:'advancedCardMessage',exit:'advancedExit',title:'Advanced Dance Clear ✓',edition:'ADVANCED / 120 BPM',number:'03',alt:'最終紅色斑點菇帽、小手腳與棕色背包的小香菇角色封面',paper:'#443a4c',edge:'#bb9e6c',accent:'#d1b578'}
+});
+export function artCardPresentation(id,count,alreadyCollected=false){const c=DANCE_ART_CARDS[id];if(!c)throw new RangeError('Unknown art card');return{...c,id,countText:`${Math.max(0,Math.min(3,Number(count)||0))} / 3`,state:alreadyCollected?'Already Collected':'收藏已記錄'};}
+if(typeof document!=='undefined'&&!document.getElementById('artCardAwardStyles')){const link=document.createElement('link');link.id='artCardAwardStyles';link.rel='stylesheet';link.href=new URL('../art-card-ui.css',import.meta.url).href;document.head.append(link);}
+export function renderArtCardAward({id,count,alreadyCollected=false}){const v=artCardPresentation(id,count,alreadyCollected),root=document.getElementById(v.host);if(!root)return;const message=document.getElementById(v.message),exit=document.getElementById(v.exit);if(root.dataset.awardCard!==String(id)){
+ root.className='art-award-overlay';root.dataset.awardCard=String(id);root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby',v.host+'Title');
+ const panel=document.createElement('div');panel.className='award-panel';panel.innerHTML=`<span class="award-eyebrow">MUSHROOM ART CARD FOUND!</span><div class="award-content"><div class="award-album edition-${id}"><div class="award-disc" aria-hidden="true"></div><div class="award-jacket"><img class="award-art" alt=""><span class="award-fallback" hidden>ART CARD #${id}<br>${v.edition}</span><span class="award-number">${v.number}</span></div></div><div class="award-copy"><h2 id="${v.host}Title"></h2><span class="award-edition"></span><p class="award-count"></p><p class="award-state"></p></div></div><div class="award-actions"></div>`;
+ panel.querySelector('.award-actions').append(exit);message.className='award-original-state';panel.querySelector('.award-copy').append(message);root.replaceChildren(panel);
+ const img=root.querySelector('.award-art');img.addEventListener('error',()=>{img.hidden=true;root.querySelector('.award-fallback').hidden=false;root.dataset.imageFallback='true';});img.alt=v.alt;img.src=new URL(`../assets/art-card-characters-v4/card-${v.number}.png`,import.meta.url).href;
+ root.addEventListener('keydown',e=>{if(e.key==='Tab'){e.preventDefault();document.getElementById(v.exit).focus();}});
+ }
+ root.style.setProperty('--award-paper',v.paper);root.style.setProperty('--award-edge',v.edge);root.style.setProperty('--award-accent',v.accent);root.querySelector('h2').textContent=v.title;root.querySelector('.award-edition').textContent=`ART CARD #${id} / ${v.edition}`;root.querySelector('.award-count').textContent=v.countText;root.querySelector('.award-state').textContent=v.state;exit.focus({preventScroll:true});
+}
