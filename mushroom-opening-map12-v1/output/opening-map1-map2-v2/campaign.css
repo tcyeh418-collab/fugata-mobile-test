@@ -24,3 +24,17 @@ body[data-ui-map="1"] .stage .primary{font-family:StudioPixel,monospace;border-r
 #storyboardCaption{left:50%;right:auto;bottom:28px;transform:translateX(-50%);width:max-content;max-width:88%;padding:0;margin:0;background:none;border:0;font-size:18px;line-height:2.25;text-align:center;box-shadow:none}
 #storyboardCaption>span{padding:6px 12px;background:#172129de;border:1px solid #b4a27e80;border-radius:6px;box-shadow:2px 2px #090f1655;box-decoration-break:clone;-webkit-box-decoration-break:clone;text-shadow:1px 1px #10171c}
 @media(max-width:750px){#storyboardCaption{left:50%;right:auto;bottom:22px;width:max-content;max-width:86%;padding:0;font-size:12px;line-height:2.3}#storyboardCaption>span{padding:5px 9px;border-radius:5px}}
+
+/* Opening occupies the viewport; game chrome returns only after the story. */
+body.story-cinema{overflow:hidden!important;background:#000!important}
+body.story-cinema *{visibility:hidden!important}
+body.story-cinema #storyboardTrial,body.story-cinema #storyboardTrial *{visibility:visible!important}
+body.story-cinema #storyboardTrial{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;z-index:2147483000!important;background:#000}
+body.story-cinema #storyboardIndex,body.story-cinema #storyboardLoading{display:none!important}
+body.story-cinema #storyboardTrial [hidden]{display:none!important}
+body.story-cinema .storyboard-image{image-rendering:auto}
+body.story-cinema #storyboardCaption{bottom:max(28px,env(safe-area-inset-bottom));font-family:StudioPixel,system-ui,sans-serif}
+body.story-cinema .storyboard-top{justify-content:flex-end;opacity:0;transition:opacity .2s}
+body.story-cinema .storyboard-top:hover,body.story-cinema .storyboard-top:focus-within{opacity:1}
+
+#storyboardTrial:focus{outline:none}

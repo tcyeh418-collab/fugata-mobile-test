@@ -1,7 +1,7 @@
 {
-  "version": "opening-v8-map12-online-20261119-v2",
+  "version": "opening-v8-map12-online-20261120-v3",
   "publicPath": "mushroom-opening-map12-v1",
   "prefix": "/fugata-mobile-test/mushroom-opening-map12-v1",
   "totalBytes": 143394102,
-  "fix": "wait for game display before starting storyboard; 30s image fallback"
+  "fix": "WebP story artwork; preload all frames before playback; viewport cinema mode"
 }
