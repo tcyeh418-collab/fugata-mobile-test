@@ -61,13 +61,13 @@ window.addEventListener('blur',()=>{map2Bgm.focused=false;map2Bgm.sync();});
 window.addEventListener('focus',()=>{map2Bgm.focused=true;map2Bgm.sync();});
 document.addEventListener('visibilitychange',()=>map2Bgm.sync());
 window.addEventListener('pagehide',()=>map2Bgm.stop());
-document.addEventListener('click',e=>{const b=e.target.closest('button');if((game.mapId!==2&&map2Audio.game?.mapId!==2)||!b||b.disabled||b.hasAttribute('data-key')||['pause','sound','fullscreen'].includes(b.id))return;const back=b.classList.contains('home')||/Exit|Close|Home|Back|exit|close|home/.test(b.id);map2Audio.updateGame(game);map2Audio.play(back?'ui-back':'button');});
+document.addEventListener('click',e=>{if(document.body.classList.contains('story-cinema'))return;const b=e.target.closest('button');if((game.mapId!==2&&map2Audio.game?.mapId!==2)||!b||b.disabled||b.hasAttribute('data-key')||['pause','sound','fullscreen'].includes(b.id))return;const back=b.classList.contains('home')||/Exit|Close|Home|Back|exit|close|home/.test(b.id);map2Audio.updateGame(game);map2Audio.play(back?'ui-back':'button');});
 window.addEventListener('blur',()=>{map2Audio.focused=false;map2Audio.stopAll();});
 window.addEventListener('focus',()=>{map2Audio.focused=true;});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)map2Audio.stopAll();});
 window.addEventListener('pagehide',()=>map2Audio.stopAll());
 globalThis.__map4Audio=map4Audio;
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(game.mapId!==4||!b||b.disabled||b.hasAttribute('data-key'))return;map4Audio.updateGame(game);void map4Audio.unlock().then(()=>map4Audio.play('button'));});
+document.addEventListener('click',e=>{if(document.body.classList.contains('story-cinema'))return;const b=e.target.closest('button');if(game.mapId!==4||!b||b.disabled||b.hasAttribute('data-key'))return;map4Audio.updateGame(game);void map4Audio.unlock().then(()=>map4Audio.play('button'));});
 for(const event of ['pointerdown','keydown'])window.addEventListener(event,()=>{campaign.audio.unlock();sfx.unlock();map2Bgm.unlock();void map2Audio.unlock();if(game.mapId===4)void map4Audio.unlock();if(sound&&audio?.state==='suspended')void audio.resume().catch(()=>{});},{capture:true});
 function tone(freq=440,duration=.1,delay=0){
  if(!sound)return;
@@ -376,4 +376,4 @@ const originalSync=sync;sync=function(){originalSync();$('resumeCampaign').hidde
 
 window.addEventListener('pagehide',()=>{if(game.mapId===1)saveCheckpoint(game);});
 
-document.addEventListener('click',e=>{const b=e.target.closest('button');if(game.mapId!==1||map2Audio.game?.mapId===2||!b||b.disabled||b.hasAttribute('data-key'))return;campaign.audio.update(game,sound);campaign.audio.sfx.play('button');});
+document.addEventListener('click',e=>{if(document.body.classList.contains('story-cinema'))return;const b=e.target.closest('button');if(game.mapId!==1||map2Audio.game?.mapId===2||!b||b.disabled||b.hasAttribute('data-key'))return;campaign.audio.update(game,sound);campaign.audio.sfx.play('button');});

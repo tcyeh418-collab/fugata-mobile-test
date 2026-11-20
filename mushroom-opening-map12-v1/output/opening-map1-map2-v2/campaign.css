@@ -38,3 +38,11 @@ body.story-cinema .storyboard-top{justify-content:flex-end;opacity:0;transition:
 body.story-cinema .storyboard-top:hover,body.story-cinema .storyboard-top:focus-within{opacity:1}
 
 #storyboardTrial:focus{outline:none}
+
+/* Mixed editorial cuts: overlap only selected boundaries, never fade each shot to black. */
+.storyboard-image{position:absolute;inset:0}
+/* The game itself occupies the page; keep functional controls in Pause. */
+#artReview,#app>.masthead,#app>footer{display:none!important}
+#app{grid-template-rows:minmax(0,1fr)!important;height:100dvh!important;background:#000!important}
+.stage-host{background:#000!important}
+.pause-settings{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:18px}

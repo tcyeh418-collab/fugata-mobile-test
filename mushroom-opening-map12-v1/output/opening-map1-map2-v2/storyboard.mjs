@@ -1,3 +1,4 @@
+import {OpeningMusic} from './opening-music.mjs';
 export const STORYBOARD=Object.freeze([
   {
     "id": "01",
@@ -147,6 +148,8 @@ export const STORYBOARD=Object.freeze([
     "duration": 4.0
   }
 ].map(s=>Object.freeze(s)));
+// All unspecified boundaries are direct cuts. Dissolves retain the previous image underneath.
+export const STORY_TRANSITIONS=Object.freeze({'01':{type:'fade-in',seconds:.7},'05':{type:'dissolve',seconds:.65},'07':{type:'dissolve',seconds:.6},'09B':{type:'dissolve',seconds:.55},'11':{type:'dissolve',seconds:.65}});
 export const STORY_DURATION=STORYBOARD.reduce((n,s)=>n+s.duration,0);
 export const STORY_SEEN_KEY='logiccode.mushroom.campaign12.story-complete.online-opening-v8.v1';
 export function storyProgress(storage){
@@ -154,21 +157,22 @@ export function storyProgress(storage){
  return {get complete(){return complete;},finish(){complete=true;try{storage?.setItem(STORY_SEEN_KEY,'1');}catch{}}};
 }
 export function mountStoryboard({stage=document.querySelector('.stage'),onFinish=()=>{}}={}){
- let storage;try{storage=localStorage;}catch{}const progress=storyProgress(storage);
+ let storage;try{storage=localStorage;}catch{}const progress=storyProgress(storage);const music=new OpeningMusic;
  const panel=document.createElement('section');panel.id='storyboardTrial';panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');panel.setAttribute('aria-label','Mushroom 故事試播');panel.hidden=true;panel.tabIndex=-1;
  panel.innerHTML='<div class="storyboard-picture"></div><div class="storyboard-top"><span id="storyboardIndex"></span><button id="storyboardSkip">跳過故事 · Esc →</button></div><div id="storyboardTitle" hidden><small>LOGIC CODE</small><b>MUSHROOM 菇</b></div><p id="storyboardCaption"><span></span></p><span id="storyboardLoading" role="status">載入畫面中…</span>';
  stage.append(panel);const picture=panel.querySelector('.storyboard-picture'),caption=panel.querySelector('#storyboardCaption'),indexLabel=panel.querySelector('#storyboardIndex'),loading=panel.querySelector('#storyboardLoading'),logo=panel.querySelector('#storyboardTitle'),skip=panel.querySelector('#storyboardSkip');
  let active=false,index=0,elapsed=0,ready=false,last=0,raf=0,token=0,failures=[],history=[];const cache=new Map;
  function asset(i){if(i>=STORYBOARD.length)return;let job=cache.get(i);if(!job){const im=new Image;im.alt=STORYBOARD[i].title;im.className='storyboard-image';im.decoding='async';im.src=STORYBOARD[i].file;job=im.decode().then(()=>im,()=>{cache.delete(i);throw new Error('故事圖片載入失敗，請重試。');});cache.set(i,job);}return job;}
  let prepared=false,preparing;
- async function prepare(onProgress=()=>{}){if(prepared)return;if(preparing)return preparing;preparing=(async()=>{let cursor=0,done=0;const worker=async()=>{while(cursor<STORYBOARD.length){const n=cursor++;await asset(n);onProgress(++done,STORYBOARD.length);}};await Promise.all([worker(),worker(),worker()]);prepared=true;})().finally(()=>preparing=null);return preparing;}
- async function show(){const current=++token;ready=false;elapsed=0;last=0;picture.style.opacity='0';const im=await asset(index);if(!active||current!==token)return;picture.replaceChildren(im);caption.firstElementChild.textContent=STORYBOARD[index].caption;caption.hidden=!STORYBOARD[index].caption;logo.hidden=STORYBOARD[index].id!=='11';loading.hidden=true;ready=true;history.push(index+1);}
- function finish(reason){if(!active||(reason==='skip'&&!progress.complete))return false;if(reason==='complete'&&!failures.length)progress.finish();active=false;token++;cancelAnimationFrame(raf);panel.hidden=true;picture.replaceChildren();document.body.classList.remove('story-cinema');stage.removeAttribute('data-storyboard');document.querySelector('#storyboardReplay')?.removeAttribute('hidden');onFinish(reason);document.querySelector('#start')?.focus({preventScroll:true});}
- function frame(now){if(!active)return;const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(ready&&!document.hidden){elapsed+=dt;const duration=STORYBOARD[index].duration;picture.style.opacity=String(Math.min(1,elapsed/.35,(duration-elapsed)/.35));if(elapsed>=duration){if(index===STORYBOARD.length-1){finish('complete');return;}index++;void show();}}raf=requestAnimationFrame(frame);}
- async function play(){if(active)return;await prepare();if(active)return;document.body.classList.add('story-cinema');active=true;index=0;elapsed=0;last=0;ready=false;failures=[];history=[];panel.hidden=false;stage.dataset.storyboard='true';skip.hidden=!progress.complete;skip.disabled=!progress.complete;(progress.complete?skip:panel).focus({preventScroll:true});void show();raf=requestAnimationFrame(frame);}
+ async function prepare(onProgress=()=>{}){if(prepared)return;if(preparing)return preparing;preparing=(async()=>{let cursor=0,done=0;const worker=async()=>{while(cursor<STORYBOARD.length){const n=cursor++;await asset(n);onProgress(++done,STORYBOARD.length);}};await Promise.all([worker(),worker(),worker(),music.prepare()]);prepared=true;})().finally(()=>preparing=null);return preparing;}
+ let transition=null;
+ async function show(){const current=++token;ready=false;elapsed=0;last=0;const im=await asset(index);if(!active||current!==token)return;const previous=picture.lastElementChild,plan=matchMedia('(prefers-reduced-motion: reduce)').matches?null:STORY_TRANSITIONS[STORYBOARD[index].id];transition=plan??{type:'cut',seconds:0};picture.dataset.transition=transition.type;picture.style.opacity='1';im.style.opacity=plan?'0':'1';if(plan&&previous&&plan.type==='dissolve'){picture.replaceChildren(previous,im);}else picture.replaceChildren(im);caption.firstElementChild.textContent=STORYBOARD[index].caption;caption.hidden=!STORYBOARD[index].caption;logo.hidden=STORYBOARD[index].id!=='11';loading.hidden=true;ready=true;history.push(index+1);}
+ function finish(reason){if(!active||(reason==='skip'&&!progress.complete))return false;if(reason==='complete'&&!failures.length)progress.finish();active=false;music.stop();token++;cancelAnimationFrame(raf);panel.hidden=true;picture.replaceChildren();document.body.classList.remove('story-cinema');stage.removeAttribute('data-storyboard');document.querySelector('#storyboardReplay')?.removeAttribute('hidden');onFinish(reason);document.querySelector('#start')?.focus({preventScroll:true});}
+ function frame(now){if(!active)return;const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(ready&&!document.hidden){elapsed+=dt;music.fade(STORYBOARD.slice(index+1).reduce((n,s)=>n+s.duration,0)+STORYBOARD[index].duration-elapsed);const duration=STORYBOARD[index].duration;const top=picture.lastElementChild;if(top){top.style.opacity=transition.seconds?String(Math.min(1,elapsed/transition.seconds)):'1';if(elapsed>=transition.seconds&&picture.children.length>1)picture.firstElementChild.remove();}if(elapsed>=duration){if(index===STORYBOARD.length-1){finish('complete');return;}index++;void show();}}raf=requestAnimationFrame(frame);}
+ async function play(){if(active)return;await prepare();if(active)return;await music.start();document.body.classList.add('story-cinema');active=true;index=0;elapsed=0;last=0;ready=false;failures=[];history=[];panel.hidden=false;stage.dataset.storyboard='true';skip.hidden=!progress.complete;skip.disabled=!progress.complete;(progress.complete?skip:panel).focus({preventScroll:true});void show();raf=requestAnimationFrame(frame);}
  skip.onclick=()=>finish('skip');
  document.addEventListener('keydown',e=>{if(!active)return;e.preventDefault();e.stopImmediatePropagation();if(!e.repeat&&(e.code==='Escape'||(e.target===skip&&['Enter','Space'].includes(e.code))))finish('skip');},true);
  document.addEventListener('keyup',e=>{if(active){e.preventDefault();e.stopImmediatePropagation();}},true);
- document.addEventListener('visibilitychange',()=>last=0);
- return {prepare,play,skip:()=>finish('skip'),get completed(){return progress.complete;},get active(){return active;},get state(){return{completed:progress.complete,active,index:index+1,elapsed,ready,failures:[...failures],history:[...history]};}};
+ document.addEventListener('visibilitychange',()=>{last=0;if(active){if(document.hidden)music.pause();else music.resume();}});window.addEventListener('pagehide',()=>music.stop());
+ return {prepare,play,get musicState(){return music.state;},skip:()=>finish('skip'),get completed(){return progress.complete;},get active(){return active;},get state(){return{completed:progress.complete,active,index:index+1,elapsed,ready,failures:[...failures],history:[...history]};}};
 }

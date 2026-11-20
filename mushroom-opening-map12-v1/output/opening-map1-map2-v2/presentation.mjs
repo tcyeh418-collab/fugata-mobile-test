@@ -1,3 +1,4 @@
+import {preloadBackgrounds} from './background-preload.mjs';
 import {KitRenderer} from './map1-renderer.mjs';
 import {Map2KitRenderer} from '/fugata-mobile-test/mushroom-opening-map12-v1/output/map2-local-playtest-v1/kit-renderer.mjs';
 import {Renderer} from '/fugata-mobile-test/mushroom-opening-map12-v1/mushroom-v2/dist/src/render.mjs?rev=map5-20261020-r1';
@@ -6,10 +7,10 @@ import {CampaignAudio} from './audio.mjs';
 const canvas=document.getElementById('game');
 const loadErrors=[];async function json(url,fallback){try{const r=await fetch(url);if(!r.ok)throw Error('HTTP '+r.status);return await r.json();}catch{loadErrors.push(url);return fallback;}}
 const m1=await json('/fugata-mobile-test/mushroom-opening-map12-v1/output/map1-local-playtest-v9/assets/manifest-v1.json',{assets:[]});for(const a of m1.assets)a.file='/fugata-mobile-test/mushroom-opening-map12-v1/output/map1-local-playtest-v9/'+a.file;
-const map1=new KitRenderer(canvas,m1);map1.backgroundManifest=await json('/fugata-mobile-test/mushroom-opening-map12-v1/output/map1-local-playtest-v9/background/manifest.json',null);
+const map1=new KitRenderer(canvas,m1);
 const m2=await json('/fugata-mobile-test/mushroom-opening-map12-v1/output/map2-local-playtest-v1/assets/manifest.json',{assets:[]});for(const a of m2.assets)a.file='/fugata-mobile-test/mushroom-opening-map12-v1/output/map2-local-playtest-v1/'+a.file;
-const map2=new Map2KitRenderer(canvas,m2);map2.backgroundManifest=await json('/fugata-mobile-test/mushroom-opening-map12-v1/output/map2-green-corridor-v2/manifest.json',null);
-await Promise.all([map1.load(),map2.load(),map1.ensureBackground(0),map2.ensureBackground(0)]);
+const map2=new Map2KitRenderer(canvas,m2);
+await Promise.all([map1.load(),map2.load(),preloadBackgrounds(map1,'/fugata-mobile-test/mushroom-opening-map12-v1/output/opening-map1-map2-v2/background-web/map1/manifest.json'),preloadBackgrounds(map2,'/fugata-mobile-test/mushroom-opening-map12-v1/output/opening-map1-map2-v2/background-web/map2/manifest.json')]);
 const original=Renderer.prototype.draw;let lastGame=null,lastGranted=false;
 export const campaignPresentation={map1,map2,loadErrors,audio:new CampaignAudio,captureOpacity,game:null,renderer:null,ready:true,resetMap1(g){map1.events=[];map1.notices=[];map1.speech=null;map1.lastPoliceX=null;map1.policeAnimator.reset();map1.bounceAt=-10;},feedback(event,g){map1.feedback([event],g);}};
 Renderer.prototype.draw=function(g,dt=0){campaignPresentation.game=g;campaignPresentation.renderer=this;document.body.dataset.artMap=g.mapId;if(g.mapId!==1&&g.mapId!==2)return original.call(this,g,dt);
