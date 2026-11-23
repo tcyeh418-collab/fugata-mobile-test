@@ -1,0 +1,48 @@
+.reward-open { border:1px solid #af925b88;background:#14202c;color:#e5d6b6;padding:10px 15px;border-radius:3px;font:12px/1.5 system-ui,sans-serif;cursor:pointer; }
+.title-console > .reward-open { width:100%;margin-top:12px; }
+.ending-actions > .reward-open { grid-column:1/-1; }
+.album-panel:has(> .reward-open) { position:relative; }
+.album-panel > .reward-open { position:absolute;top:10px;right:12px;padding:3px 8px;font-size:10px;min-height:28px!important; }
+.reward-dialog { box-sizing:border-box;width:min(1080px,calc(100vw - 40px));max-height:calc(100dvh - 40px);padding:26px 30px 18px;border:1px solid #af925b;color:#eee0c4;background:radial-gradient(ellipse at 80% 10%,#223747,#101923 65%);border-radius:6px;box-shadow:0 24px 100px #0009;font-family:system-ui,sans-serif;overflow:auto; }
+.reward-dialog::backdrop { background:#02070ddc;backdrop-filter:blur(5px); }
+.reward-dialog * { box-sizing:border-box; }
+.reward-dialog canvas { aspect-ratio:auto;border:0;border-radius:0; }
+.reward-dialog button { cursor:pointer;color:#deceb0;border:1px solid #91795588;background:#152431;border-radius:3px;font:13px/1.5 system-ui,sans-serif; }
+.reward-dialog button:hover:not(:disabled) { border-color:#e0c78e;background:#243b4b; }
+.reward-dialog button:disabled { opacity:.45;cursor:default; }
+.reward-dialog button:focus-visible,.reward-open:focus-visible { outline:2px solid #9fd8ee;outline-offset:3px; }
+.reward-header { display:flex;justify-content:space-between;gap:20px;align-items:start;padding-bottom:18px;border-bottom:1px solid #af925b44; }
+.reward-header small,.reward-place { color:#bda678;font:10px/1.6 ui-monospace,monospace;letter-spacing:.16em; }
+.reward-header h2 { margin:6px 0;font-size:27px;font-weight:500;letter-spacing:.12em; }
+.reward-header p { color:#9dabb7;margin:6px 0 0;font-size:12px; }
+.reward-header > button { min-width:36px;min-height:36px; }
+.reward-layout { display:grid;grid-template-columns:1.2fr 1fr;gap:28px;padding-top:22px; }
+.reward-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px; }
+.reward-card { min-width:0;display:flex;flex-direction:column;align-items:center;padding:10px 4px 14px;gap:4px;position:relative; }
+.reward-card canvas { width:min(100%,120px);height:auto; }
+.reward-card strong { font-size:12px;font-weight:500; }
+.reward-card span { font-size:10px;color:#bca97e; }
+.reward-card[data-locked="true"] canvas { opacity:.32;filter:grayscale(.85); }
+.reward-card[aria-pressed="true"] { background:#223441;border-color:#e0c78e;box-shadow:inset 0 0 0 1px #e0c78e33; }
+.reward-count { text-align:right;font:11px/1.6 ui-monospace,monospace;color:#a39a82;margin:14px 0; }
+.reward-detail { border-left:1px solid #af925b44;padding-left:26px; }
+.reward-hero { display:flex;align-items:center;gap:14px; }
+.reward-hero canvas { width:94px;height:94px;flex-shrink:0; }
+.reward-hero h3 { font-size:20px;font-weight:500;margin:5px 0; }
+.reward-copy { color:#b2bec6;font-size:12px;line-height:1.7;margin:0; }
+.reward-avatar { width:100%;height:232px;margin:12px 0 8px;position:relative;display:flex;justify-content:center;align-items:end;border:1px solid #a58a5933;background:radial-gradient(ellipse at 50% 75%,#63839733,transparent 65%),linear-gradient(#0b131cc9,#0b131cb3),url('../assets/art/fugata/room01/dark-v1/background-clean-v1.png') center/cover; }
+.reward-avatar canvas { height:228px;width:auto; }
+.reward-avatar p { position:absolute;left:10px;bottom:2px;font-size:10px;color:#b4bec3; }
+.reward-directions { display:flex;justify-content:center;gap:8px; }
+.reward-directions button { padding:6px 12px; }
+.reward-directions [aria-pressed="true"] { background:#d8c18d;color:#111b26; }
+.reward-slot-note { color:#aab8c2;font-size:11px;line-height:1.7;min-height:20px;margin:12px 0; }
+.reward-actions { display:flex;gap:10px; }
+.reward-actions button { min-height:40px;flex:1;padding:8px; }
+.reward-actions [data-equip]:not(:disabled) { background:#dfc893;color:#111b26;border-color:#dfc893; }
+.reward-footer { display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid #af925b44;margin-top:18px;padding-top:12px; }
+.reward-footer p { margin:0;color:#b7c8bb;font-size:11px; }
+.reward-footer button { padding:5px 10px; }
+.reward-footer small { margin-left:auto;font-size:10px;color:#899eac; }
+@media(max-width:800px) { .reward-dialog{padding:18px;width:calc(100vw - 24px);max-height:calc(100dvh - 24px);} .reward-layout{grid-template-columns:1fr;gap:16px;} .reward-detail{border-left:0;border-top:1px solid #af925b44;padding:16px 0 0;} .reward-grid{grid-template-columns:repeat(3,minmax(0,1fr));}.reward-card canvas{width:80px;} .reward-footer small{margin-left:0;} }
+@media(max-height:700px) and (min-width:801px) { .reward-dialog{padding-top:18px;} .reward-header{padding-bottom:12px;} .reward-layout{padding-top:14px;} .reward-avatar{height:175px;} .reward-avatar canvas{height:173px;} .reward-card canvas{width:100px;} .reward-header h2{font-size:24px;} }

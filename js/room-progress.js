@@ -1,3 +1,4 @@
+import {isRoom04Review,room04ReviewResult} from './room04-review.js';
 export function roomProgressView(state) {
   const room = state.gameProgress.currentRoom;
   if (state.phase !== "game" || ![4, 6].includes(room)) return { visible: false };
@@ -38,7 +39,7 @@ export function createRoomTransitionController(root) {
     root.style.opacity = String(transition.opacity);
     root.dataset.phase = transition.phase;
     eyebrow.textContent = transition.roomChanged
-      ? `${roomCopy(transition.toRoom).ordinal}／06`
+      ? `${roomCopy(transition.toRoom,state).ordinal}／06`
       : "";
     title.textContent = transition.roomChanged ? transition.title ?? "" : "";
   }
@@ -47,6 +48,7 @@ export function createRoomTransitionController(root) {
 
 function door04View(state) {
   const door = state.door04;
+  if(isRoom04Review(state))return {visible:true,eyebrow:'Room 4／聲部的編織',title:door.completed?'四聲部編織完成':'一次排列四個聲部',copy:'參考台可拖曳重聽。放滿四個音匣後測試；紅環需調整，綠環目前正確。',steps:state.door04Slots.map(slot=>({label:`位置 ${slot.index+1}：${room04ReviewResult(state,slot)==='correct'?'目前正確':room04ReviewResult(state,slot)==='incorrect'?'需要調整':slot.assignedVoiceId?'已放入':'空位'}`,state:room04ReviewResult(state,slot)==='correct'?'complete':'active'}))};
   const stageIndex = ({ reference: 0, pair: 1, trio: 2, quartet: 3, complete: 4 })[door.stage] ?? 0;
   const labels = [
     "1. 完整聆聽聲部參考混音",

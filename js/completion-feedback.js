@@ -1,3 +1,4 @@
+import {chapterOrdinal} from './chapter-route.js';
 const DISPLAY_DURATION = 2.2;
 const FADE_DURATION = 0.4;
 
@@ -15,7 +16,7 @@ export function showRoomCompletion(state, room) {
   state.ui.completionMarker = {
     room,
     title,
-    progress: `FUGATA RECONSTRUCTION ${room} / 6`,
+    progress: `FUGATA RECONSTRUCTION ${chapterOrdinal(state,room)} / 6`,
     remaining: DISPLAY_DURATION,
     duration: DISPLAY_DURATION,
     fadeDuration: FADE_DURATION,

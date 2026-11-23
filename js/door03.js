@@ -1,5 +1,6 @@
-import { allowedTarget } from "./interaction-targets.js?v=room04-low-desk-v2";
+import { allowedTarget } from "./interaction-targets.js";
 import { updateNpcAnimation } from "./character/npc-v3.js";
+import {isDarkRoom3State,darkRoom3ArtToWorld} from './dark-room3-layout.js';
 import { distanceBetween } from "./collision.js";
 import {
   DOOR03_COMPLETION,
@@ -13,9 +14,9 @@ import {
   VALID_DOOR03_EDGES,
   allDoor03Ports,
 } from "./door03-synth-data.js";
-import { setMessage } from "./state.js?v=room04-low-desk-v2";
+import { setMessage } from "./state.js";
 import { roomCompletionActive, showRoomCompletion } from "./completion-feedback.js";
-import { ROOM03_CHARACTER_SPOTS as room03CharacterSpots } from "./room03-layout.js?v=room03-side-gate-v1";
+import { ROOM03_CHARACTER_SPOTS as room03CharacterSpots } from "./room03-layout.js";
 
 const REJECT_DURATION = 0.8;
 
@@ -338,7 +339,10 @@ function updateModuleStates(state) {
 function updateDoor03Characters(state, deltaTime) {
   if (state.gameProgress.currentRoom !== 3 || !state.room03Characters) return;
   const sceneKey = state.gameProgress.flags.patchCompleted ? "complete" : state.door03.currentStep;
-  const spots = room03CharacterSpots[sceneKey] ?? room03CharacterSpots[0];
+  const spots = isDarkRoom3State(state)?{
+    leroy:darkRoom3ArtToWorld({x:430,y:960}),
+    pinxin:darkRoom3ArtToWorld({x:2070,y:960}),
+  }:room03CharacterSpots[sceneKey] ?? room03CharacterSpots[0];
   const response = 1 - Math.exp(-deltaTime * (state.dialogue.active ? 3.2 : 2.15));
 
   for (const [key, character] of Object.entries(state.room03Characters)) {

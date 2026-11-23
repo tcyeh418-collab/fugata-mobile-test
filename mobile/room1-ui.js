@@ -1,6 +1,6 @@
 import { feedbackMessage, hintsEnabled } from '../js/feedback-policy.js';
 import { currentDialogueEntry } from "../js/dialogue.js";
-import { isNearDoor } from "../js/door01.js?v=room01-theme-replay-v1";
+import { isNearDoor } from "../js/door01.js";
 import { door03PortById } from "../js/door03.js";
 import { door03GuideViewModel } from "../js/door03-guide.js";
 import {
@@ -11,7 +11,7 @@ import {
   nearDoor04Test,
   nearestDoor04Pedestal,
   nearestDoor04Slot,
-} from "../js/door04.js?v=room04-movement-fixes-v6";
+} from "../js/door04.js";
 import {
   door05ConfirmedAccents,
   door05Phase,
@@ -30,8 +30,8 @@ import {
   nearestDoor06Memory,
   nearestDoor06Relay,
 } from "../js/door06.js";
-import { heldFragment } from "../js/state.js?v=room04-movement-fixes-v6";
-import { currentObjective } from "../js/room-help.js?v=room04-movement-fixes-v6";
+import { heldFragment } from "../js/state.js";
+import { currentObjective } from "../js/room-help.js";
 
 const MOVEMENT_THRESHOLD = 10;
 const DEAD_ZONE = 14;

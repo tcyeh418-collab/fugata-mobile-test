@@ -2,13 +2,13 @@ import {
   createDoor03Modules,
   DOOR03_PATCH_MONITOR,
   DOOR03_SPEAKER,
-} from "./door03-synth-data.js?v=room03-side-gate-v1";
+} from "./door03-synth-data.js";
 import {
   createDoor04Capsules,
   createDoor04Slots,
   DOOR04_REFERENCE_CONSOLE,
   DOOR04_TEST_CONSOLE,
-} from "./door04.js?v=room04-movement-fixes-v6";
+} from "./door04.js";
 import {
   createDoor05Nodes,
   DOOR05_FINAL_CONSOLE,
@@ -25,17 +25,17 @@ import {
 import {
   ROOM02_CABLE_ROUTES,
   ROOM02_PLACEMENTS,
-} from "./room02-layout.js?v=room02-perspective-exit-v1";
+} from "./room02-layout.js";
 import {
   ROOM01_DOORWAY,
   ROOM01_STATIONS,
   ROOM01_THEME_REPLAY_DEVICE,
-} from "./room01-layout.js?v=room01-theme-replay-v1";
+} from "./room01-layout.js";
 import {
   ROOM03_CHARACTER_INITIAL,
   ROOM03_DOORWAY,
-} from "./room03-layout.js?v=room03-side-gate-v1";
-import { ROOM04_CHARACTER_INITIAL } from "./room04-layout.js?v=room04-movement-fixes-v6";
+} from "./room03-layout.js";
+import { ROOM04_CHARACTER_INITIAL } from "./room04-layout.js";
 
 export const WORLD = Object.freeze({ width: 5630, height: 640 });
 
@@ -75,6 +75,7 @@ export function createInitialState(random = Math.random) {
     phase: "title",
     elapsedTime: 0,
     gameProgress: {
+      route: 'classic-v1',
       tutorialRooms: [],
       currentRoom: 1,
       currentDoor: 1,
@@ -161,6 +162,8 @@ export function createInitialState(random = Math.random) {
       openingDuration: 1.3,
     },
     door04: {
+      testMode: 'staged',
+      reviewResults: [null,null,null,null],
       id: "door-04",
       status: "reference-ready",
       stage: "reference",
@@ -476,6 +479,7 @@ export function createInitialState(random = Math.random) {
       previewLevel: 0,
     },
     ui: {
+      rewardsOpen: false,
       hintsVisible: false,
       saveError: null,
       learningNote: null,

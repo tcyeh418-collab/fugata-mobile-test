@@ -1,11 +1,11 @@
-import { allowedTarget } from "./interaction-targets.js?v=room04-low-desk-v2";
+import { allowedTarget } from "./interaction-targets.js";
 import { ROOM06_LANDMARKS, ROOM06_ENERGY_PATHS } from "./room06-art.js";
 import { distanceBetween } from "./collision.js";
 import {
   DOOR06_COMPLETION, DOOR06_STAGE_TRANSITION, DOOR06_WRONG_HINTS,
   startDialogue,
 } from "./dialogue.js";
-import { setMessage } from "./state.js?v=room04-low-desk-v2";
+import { setMessage } from "./state.js";
 import { roomCompletionActive, showRoomCompletion } from "./completion-feedback.js";
 
 export const DOOR06_RELAY_ORDER = Object.freeze(["subject", "answer", "patch", "voices", "rhythm"]);

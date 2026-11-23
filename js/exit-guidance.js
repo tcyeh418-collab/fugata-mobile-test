@@ -1,6 +1,6 @@
-import {door01Collider,door02Collider,door03Collider,door04Collider,door05Collider,door06Collider} from './rooms.js?v=room04-movement-fixes-v6';
+import {door01Collider,door02Collider,door03Collider,door04Collider,door05Collider,door06Collider} from './rooms.js';
 import {ROOM03_DOORWAY} from './room03-layout.js';
-import {ROOM04_DOORWAY} from './room04-layout.js?v=room04-movement-fixes-v6';
+import {ROOM04_DOORWAY} from './room04-layout.js';
 const exits=[door01Collider,door02Collider,door03Collider,door04Collider,door05Collider,door06Collider];
 export function drawExitGuidance(ctx,state){
  const room=state.gameProgress.currentRoom,door=state['door0'+room],rect=exits[room-1];if(!rect)return;

@@ -1,4 +1,4 @@
-import { ROOM03_DEVICE_GEOMETRY } from "./room03-layout.js?v=room04-movement-fixes-v6";
+import { ROOM03_DEVICE_GEOMETRY } from "./room03-layout.js";
 
 export const ROOM04_ARTBOARD = Object.freeze({ width: 1536, height: 1024 });
 

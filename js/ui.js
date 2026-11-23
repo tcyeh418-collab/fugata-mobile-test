@@ -1,6 +1,6 @@
-import {allowedTarget} from "./interaction-targets.js?v=room01-theme-replay-v1";
+import {allowedTarget} from "./interaction-targets.js";
 import { feedbackMessage, hintsEnabled } from './feedback-policy.js';
-import { isNearDoor, isNearThemeReplayDevice, nearestPedestal } from "./door01.js?v=room01-theme-replay-v1";
+import { isNearDoor, isNearThemeReplayDevice, nearestPedestal } from "./door01.js";
 import { nearestEchoTower, nearestSubjectTerminal } from "./door02.js";
 import {
   door03PortById,
@@ -18,7 +18,7 @@ import {
   nearDoor04Test,
   nearestDoor04Pedestal,
   nearestDoor04Slot,
-} from "./door04.js?v=room04-movement-fixes-v6";
+} from "./door04.js";
 import {
   door05Phase,
   door05ConfirmedAccents,
@@ -36,7 +36,8 @@ import {
   nearestDoor06Relay,
 } from "./door06.js";
 import { roomCopy } from "./room-copy.js";
-import { heldFragment } from "./state.js?v=room01-theme-replay-v1";
+import {chapterOrdinal,isIntegratedState} from './chapter-route.js';
+import { heldFragment } from "./state.js";
 import { updateRoomCompletion } from "./completion-feedback.js";
 
 const READY_NOTICE_DURATION = 2.7;
@@ -98,9 +99,9 @@ export function createGameUi(elements) {
   function render(state) {
     const carried = heldFragment(state);
     const room = state.gameProgress.currentRoom;
-    statusRoom.textContent = room === 3
+    statusRoom.textContent = room === 3&&!isIntegratedState(state)
       ? "Room 3／共六室"
-      : `${roomCopy(room).ordinal}／共六室`;
+      : `${roomCopy(room,state).ordinal}／共六室`;
     statusDoors.textContent = `${state.gameProgress.doorsCompleted}／${state.gameProgress.totalDoors}`;
     const carriedVoice = heldDoor04Voice(state);
     statusCarrying.textContent = roomCarryingLabel(state, carried, carriedVoice);
@@ -195,6 +196,7 @@ function renderRoom03Hud(state, elements) {
   const { gameScreen, room03Hud, room03Objective, room03Device, room03StepCount, room03StepPips } = elements;
   const isRoom03 = state.gameProgress.currentRoom === 3;
   gameScreen.dataset.room = String(state.gameProgress.currentRoom);
+  gameScreen.dataset.chapterPosition=String(chapterOrdinal(state));
   gameScreen.dataset.dialogue = String(state.dialogue.active);
   room03Hud.hidden = !isRoom03;
   if (!isRoom03) return;
@@ -595,7 +597,7 @@ function renderAudioNotice(state, element) {
 }
 
 function renderGameplayFeedback(state, element) {
-  const message = feedbackMessage(state);
+  const message = state.ui.centeredFeedbackEnabled?null:feedbackMessage(state);
   element.hidden = !message;
   element.textContent = message?.lines.join("  ·  ") ?? "";
   element.dataset.kind = message?.kind ?? "status";

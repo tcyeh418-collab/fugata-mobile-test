@@ -1,4 +1,4 @@
-import { ROOM03_DOORWAY } from "./room03-layout.js?v=room03-side-gate-v1";
+import { ROOM03_DOORWAY } from "./room03-layout.js";
 
 export const ROOM02_ARTBOARD = Object.freeze({ width: 1536, height: 1024 });
 

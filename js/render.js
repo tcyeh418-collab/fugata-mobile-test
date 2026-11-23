@@ -1,7 +1,14 @@
+import {createDarkRoom6Renderer} from './dark-room6.js';
+import {createDarkRoom5Renderer} from './dark-room5.js';
+import {createDarkRoom4Renderer} from './dark-room4.js';
 import {room04CarriedCapsule} from "./room04-carry.js";
+import {WIDE_ROOM1} from './wide-room1.js';
+import {createDarkRoom1Renderer} from './dark-room1.js';
+import {createDarkRoom2Renderer} from './dark-room2.js';
+import {createDarkRoom3Renderer} from './dark-room3.js';
 import {room04InteractionFrame, room04DeviceState, ROOM04_DEVICE_STATES, ROOM04_STATE_FRAMES} from "./room04-atlas.js";
-import {drawExitGuidance} from "./exit-guidance.js?v=room04-movement-fixes-v6";
-import {targets,reachable} from "./interaction-targets.js?v=room01-theme-replay-v1";
+import {drawExitGuidance} from "./exit-guidance.js";
+import {targets,reachable} from "./interaction-targets.js";
 import { ROOM06_ART, ROOM06_PORTALS } from "./room06-art.js";
 import { ROOM05_ART, ROOM05_LANDMARKS, ROOM05_RING_CENTER, room05RingPoint } from "./room05-art.js";
 import { drawNpc, loadNpcArt } from "./character/npc-v3.js";
@@ -11,22 +18,22 @@ import {
   DOOR03_SIGNAL_TYPES,
   VALID_DOOR03_EDGES,
   isDoor03StaticGuideEdge,
-} from "./door03-synth-data.js?v=room03-side-gate-v1";
-import { door04TestConsoleLabel } from "./door04.js?v=room04-movement-fixes-v6";
-import { rooms, staticWalls } from "./rooms.js?v=room01-theme-replay-v1";
+} from "./door03-synth-data.js";
+import { door04TestConsoleLabel } from "./door04.js";
+import { rooms, staticWalls } from "./rooms.js";
 import {
   ROOM01_DOORWAY,
   ROOM01_STATIONS,
   ROOM01_STATION_SPRITE,
   ROOM01_THEME_REPLAY_DEVICE,
   ROOM01_VIEWPORT,
-} from "./room01-layout.js?v=room01-theme-replay-v1";
+} from "./room01-layout.js";
 import {
   ROOM02_ARTBOARD,
   ROOM02_SPRITE_LAYOUT,
   ROOM02_TERMINAL_CABLE_ROUTE,
   ROOM02_VIEWPORT,
-} from "./room02-layout.js?v=room02-perspective-exit-v1";
+} from "./room02-layout.js";
 import {
   ROOM03_ARTBOARD,
   ROOM03_CABLE_WAYPOINTS,
@@ -37,7 +44,7 @@ import {
   ROOM03_PROCEDURAL_WALL_IDS,
   ROOM03_VIEWPORT,
   room03GateDestination,
-} from "./room03-layout.js?v=room03-side-gate-v1";
+} from "./room03-layout.js";
 import {
   ROOM04_ARTBOARD,
   ROOM04_ACTOR_LAYOUT,
@@ -48,8 +55,8 @@ import {
   ROOM04_PROCEDURAL_WALL_IDS,
   ROOM04_SPRITE_LAYOUT,
   ROOM04_VIEWPORT,
-} from "./room04-layout.js?v=room04-movement-fixes-v6";
-import { WORLD, heldFragment } from "./state.js?v=room01-theme-replay-v1";
+} from "./room04-layout.js";
+import { WORLD, heldFragment } from "./state.js";
 
 const C = {
   background: "#090710", floor: "#12101a", floor2: "#0d121b", floor3: "#101018",
@@ -139,6 +146,31 @@ const ROOM04_ART_SOURCES = Object.freeze({
 
 export function createRenderer(canvas, options = {}) {
   loadNpcArt();
+  const viewport = { width: canvas.width, height: canvas.height };
+  const wideTrial = canvas.dataset.artTrial === 'wide-v1';
+  const wideBackground = wideTrial ? loadImage(WIDE_ROOM1.background) : null;
+  const wideExtension = wideTrial ? loadImage(WIDE_ROOM1.extension) : null;
+  let wideCore = null;
+  function room01WidePlate() {
+    if (wideCore) return wideCore;
+    if (!imageReady(wideBackground) || !imageReady(wideExtension)) return null;
+    const plate = document.createElement('canvas');
+    plate.width = 1280; plate.height = 720;
+    const ctx = plate.getContext('2d');
+    const width = Math.min(wideBackground.naturalWidth, wideBackground.naturalHeight * 16 / 9);
+    const height = width * 9 / 16;
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(wideBackground,(wideBackground.naturalWidth-width)/2,(wideBackground.naturalHeight-height)/2,width,height,0,0,1280,720);
+    // Blend only the outer masonry into the new plate; registered devices,
+    // rings and doorway stay opaque and retain their exact placement.
+    const edge = ctx.createLinearGradient(0,0,1280,0);
+    edge.addColorStop(0,'transparent'); edge.addColorStop(.025,'#fff');
+    edge.addColorStop(.975,'#fff'); edge.addColorStop(1,'transparent');
+    ctx.globalCompositeOperation = 'destination-in'; ctx.fillStyle = edge;
+    ctx.fillRect(0,0,1280,720);
+    wideCore = plate;
+    return plate;
+  }
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas 2D context is unavailable.");
   const externalRoom01Ui = options.externalRoom01Ui === true;
@@ -161,11 +193,39 @@ export function createRenderer(canvas, options = {}) {
   const room06Image = loadImage(ROOM06_ART.src);
   const reducedMotion = options.reducedMotion
     ?? (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false);
+  const darkRoom1=canvas.dataset.artTrial==='dark-v1'?createDarkRoom1Renderer(canvas,{reducedMotion}):null;
+  const darkRoom2=canvas.dataset.artTrial==='dark-v1'?createDarkRoom2Renderer(canvas,{reducedMotion}):null;
+  const darkRoom6=canvas.dataset.artTrial==='dark-v1'?createDarkRoom6Renderer(canvas,{reducedMotion}):null;
+  const darkRoom5=canvas.dataset.artTrial==='dark-v1'?createDarkRoom5Renderer(canvas,{reducedMotion}):null;
+  const darkRoom4=canvas.dataset.artTrial==='dark-v1'?createDarkRoom4Renderer(canvas,{reducedMotion}):null;
+  const darkRoom3=canvas.dataset.artTrial==='dark-v1'?createDarkRoom3Renderer(canvas,{reducedMotion}):null;
 
   function render(state) {
     canvas.dataset.reducedMotion = String(reducedMotion);
-    const followedCameraX = state.player.x - canvas.width * 0.5;
-    const room01CameraX = rooms.subject.x - (canvas.width - rooms.subject.width) * 0.5;
+    if(darkRoom1&&state.gameProgress.currentRoom===1){darkRoom1.render(state);return;}
+    if(darkRoom2&&state.gameProgress.currentRoom===2){darkRoom2.render(state);return;}
+    if(darkRoom6&&state.gameProgress.currentRoom===6){darkRoom6.render(state);return;}
+    if(darkRoom5&&state.gameProgress.currentRoom===5){darkRoom5.render(state);return;}
+    if(darkRoom4&&state.gameProgress.currentRoom===4){darkRoom4.render(state);return;}
+    if(darkRoom3&&state.gameProgress.currentRoom===3){darkRoom3.render(state);return;}
+    canvas.dataset.projectionScaleY='';canvas.dataset.projectionOffsetY='';
+    const wide = wideTrial && state.gameProgress.currentRoom === 1;
+    const width = wide ? Number(canvas.dataset.wideWidth) || WIDE_ROOM1.width : viewport.width;
+    const height = wide ? WIDE_ROOM1.height : viewport.height;
+    const offsetX = (width - viewport.width * WIDE_ROOM1.scale) / 2;
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    canvas.dataset.projectionScale = String(wide ? WIDE_ROOM1.scale : 1);
+    canvas.dataset.projectionOffsetX = String(wide ? offsetX : 0);
+    canvas.dataset.wideArtReady = String(wide && imageReady(wideBackground) && imageReady(wideExtension));
+    context.setTransform(1, 0, 0, 1, 0, 0);
+    context.clearRect(0, 0, width, height);
+    context.save();
+    if (wide) context.setTransform(WIDE_ROOM1.scale, 0, 0, WIDE_ROOM1.scale, offsetX, 0);
+    const followedCameraX = state.player.x - viewport.width * 0.5;
+    const room01CameraX = rooms.subject.x - (viewport.width - rooms.subject.width) * 0.5;
     const cameraX = state.gameProgress.currentRoom === 1
       ? room01CameraX
       : state.gameProgress.currentRoom === 2
@@ -177,12 +237,11 @@ export function createRenderer(canvas, options = {}) {
         : Math.max(
         0,
         Math.min(
-          WORLD.width - canvas.width,
+          WORLD.width - viewport.width,
           state.gameProgress.currentRoom === 3 ? ROOM03_VIEWPORT.x : followedCameraX,
         ),
       );
     canvas.dataset.cameraX=String(cameraX);
-    context.clearRect(0, 0, canvas.width, canvas.height);
     context.imageSmoothingEnabled = false;
     drawBackground(cameraX);
     context.save();
@@ -249,6 +308,7 @@ export function createRenderer(canvas, options = {}) {
     if (state.dialogue.active && !externalRoomUiRooms.has(state.gameProgress.currentRoom)) {
       drawDialogue(state);
     }
+    context.restore();
   }
 
   function drawRoom05Art() {
@@ -344,12 +404,12 @@ export function createRenderer(canvas, options = {}) {
 
   function drawBackground(cameraX) {
     context.fillStyle = C.background;
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillRect(0, 0, viewport.width, viewport.height);
     context.strokeStyle = "rgba(154, 120, 200, 0.055)";
     context.lineWidth = 1;
     const offset = -(cameraX % 32);
-    for (let x = offset; x < canvas.width; x += 32) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, canvas.height); context.stroke(); }
-    for (let y = 0; y < canvas.height; y += 32) { context.beginPath(); context.moveTo(0, y); context.lineTo(canvas.width, y); context.stroke(); }
+    for (let x = offset; x < viewport.width; x += 32) { context.beginPath(); context.moveTo(x, 0); context.lineTo(x, viewport.height); context.stroke(); }
+    for (let y = 0; y < viewport.height; y += 32) { context.beginPath(); context.moveTo(0, y); context.lineTo(viewport.width, y); context.stroke(); }
   }
 
   let depthQueue = null;
@@ -398,10 +458,12 @@ export function createRenderer(canvas, options = {}) {
 
   function drawRoom01Backdrop(state) {
     const room = rooms.subject;
-    const background = room01Art.background;
+    const useWide = wideTrial && state.gameProgress.currentRoom === 1 && imageReady(wideBackground);
+    const background = useWide ? wideBackground : room01Art.background;
     const isActive = state.gameProgress.currentRoom === 1;
     const backdropRect = isActive
-      ? ROOM01_VIEWPORT
+      ? useWide ? {x: 360 - canvas.width / WIDE_ROOM1.scale / 2, y: 0,
+        width: canvas.width / WIDE_ROOM1.scale, height: ROOM01_VIEWPORT.height} : ROOM01_VIEWPORT
       : room;
     context.save();
     context.beginPath();
@@ -409,13 +471,27 @@ export function createRenderer(canvas, options = {}) {
     context.clip();
     if (imageReady(background)) {
       context.imageSmoothingEnabled = false;
-      context.drawImage(
-        background,
-        backdropRect.x,
-        backdropRect.y,
-        backdropRect.width,
-        backdropRect.height,
-      );
+      if (useWide) {
+        if (imageReady(wideExtension)) {
+          const scale = Math.max(backdropRect.width / wideExtension.naturalWidth, 640 / wideExtension.naturalHeight);
+          const width = wideExtension.naturalWidth * scale, height = wideExtension.naturalHeight * scale;
+          context.drawImage(wideExtension, 360-width/2, (640-height)/2, width, height);
+        }
+        // The generator may round the raster dimensions by one pixel. Crop
+        // the subpixel excess uniformly instead of distorting the scene.
+        const sourceWidth = Math.min(background.naturalWidth, background.naturalHeight * 16 / 9);
+        const sourceHeight = sourceWidth * 9 / 16;
+        const plate = room01WidePlate();
+        if (plate) context.drawImage(plate, ROOM01_VIEWPORT.x-WIDE_ROOM1.offsetX/WIDE_ROOM1.scale, 0,
+          WIDE_ROOM1.width/WIDE_ROOM1.scale, 640);
+        else context.drawImage(background,
+          (background.naturalWidth - sourceWidth) / 2, (background.naturalHeight - sourceHeight) / 2,
+          sourceWidth, sourceHeight,
+          ROOM01_VIEWPORT.x-WIDE_ROOM1.offsetX/WIDE_ROOM1.scale, 0,
+          WIDE_ROOM1.width/WIDE_ROOM1.scale, 640);
+      } else {
+        context.drawImage(background, backdropRect.x, backdropRect.y, backdropRect.width, backdropRect.height);
+      }
     } else {
       const fallback = context.createRadialGradient(360, 290, 30, 360, 290, 420);
       fallback.addColorStop(0, "#17233b");
@@ -620,12 +696,13 @@ export function createRenderer(canvas, options = {}) {
   }
 
   function drawFutureRoomMask(state) {
+    if (wideTrial && state.gameProgress.currentRoom === 1) return;
     if (state.gameProgress.currentRoom >= 5) return;
     const boundaries = { 1: 840, 2: ROOM02_VIEWPORT.x + ROOM02_VIEWPORT.width, 3: 2560, 4: 3520, 5: 4480 };
     const boundary = boundaries[state.gameProgress.currentRoom];
     if (!boundary) return;
     context.fillStyle = "#05040a";
-    context.fillRect(boundary, 0, WORLD.width - boundary, canvas.height);
+    context.fillRect(boundary, 0, WORLD.width - boundary, viewport.height);
   }
 
   function label(text, x, y) { context.fillStyle = "rgba(220,207,236,.25)"; context.font = "600 11px ui-sans-serif,system-ui"; context.fillText(text, x, y); }
@@ -2071,6 +2148,28 @@ export function createRenderer(canvas, options = {}) {
 
   function drawRoom01Foreground(state) {
     if (state.gameProgress.currentRoom !== 1) return;
+    if (wideTrial && imageReady(wideBackground)) {
+      // The old cutout contains a different arch. Reproject only this plate's
+      // near right-hand pier above the actor, keeping its pixels registered.
+      if (room01DoorDepth(state) > 0) {
+        const sourceWidth = Math.min(wideBackground.naturalWidth, wideBackground.naturalHeight * 16 / 9);
+        const sourceHeight = sourceWidth * 9 / 16;
+        context.save();
+        context.beginPath();
+        context.rect(795, 0, 200, 640);
+        context.clip();
+        const plate = room01WidePlate();
+        if (plate) context.drawImage(plate, ROOM01_VIEWPORT.x-WIDE_ROOM1.offsetX/WIDE_ROOM1.scale, 0,
+          WIDE_ROOM1.width/WIDE_ROOM1.scale, 640);
+        else context.drawImage(wideBackground,
+          (wideBackground.naturalWidth-sourceWidth)/2, (wideBackground.naturalHeight-sourceHeight)/2,
+          sourceWidth, sourceHeight,
+          ROOM01_VIEWPORT.x-WIDE_ROOM1.offsetX/WIDE_ROOM1.scale, 0,
+          WIDE_ROOM1.width/WIDE_ROOM1.scale, 640);
+        context.restore();
+      }
+      return;
+    }
     context.save();
     if (room01DoorDepth(state) > 0 && imageReady(room01Art.doorwayForeground)) {
       const foreground = ROOM01_DOORWAY.foregroundSprite;
@@ -2110,6 +2209,15 @@ export function createRenderer(canvas, options = {}) {
     const doorwayDepth = room01DoorDepth(state);
     const exitPerspective = room02ExitPerspective(state);
     context.save();
+    if (wideTrial && state.gameProgress.currentRoom === 1) {
+      const zone = ROOM01_DOORWAY.depthZone;
+      if (p.y >= zone.minY && p.y <= zone.maxY) {
+        // Ease feet onto the painted passage floor, then recede into it.
+        // This affects presentation only; the shared doorway rules stay intact.
+        const approach = clamp((p.x - 650) / 70, 0, 1);
+        context.translate(0, Math.max(0, 302 - doorwayDepth * 24 - p.y) * approach);
+      }
+    }
     if (doorwayDepth > 0) {
       const scale = 1 - doorwayDepth * 0.16;
       context.translate(p.x, p.y);
@@ -2225,18 +2333,18 @@ export function createRenderer(canvas, options = {}) {
     const textWidth = Math.max(...hint.lines.map((line) => context.measureText(line).width), 120);
     const width = Math.min(360, Math.max(156, textWidth + 32));
     const height = 18 + hint.lines.length * 20;
-    let x = clamp(anchorX - width / 2, 12, canvas.width - width - 12);
+    let x = clamp(anchorX - width / 2, 12, viewport.width - width - 12);
     let y = anchorY - height - 58;
     if (y < 12) y = anchorY + 52;
-    y = clamp(y, 12, canvas.height - height - 12);
+    y = clamp(y, 12, viewport.height - height - 12);
 
     const playerX = state.player.x - cameraX;
     const playerY = state.player.y;
     if (rectNearPoint(x, y, width, height, playerX, playerY, state.player.radius + 10)) {
       const alternateY = anchorY + 54;
-      y = alternateY + height <= canvas.height - 12
+      y = alternateY + height <= viewport.height - 12
         ? alternateY
-        : clamp(anchorY - height - 72, 12, canvas.height - height - 12);
+        : clamp(anchorY - height - 72, 12, viewport.height - height - 12);
     }
 
     context.globalAlpha = hint.alpha;
@@ -2262,8 +2370,8 @@ export function createRenderer(canvas, options = {}) {
   }
 
   function drawCompactInteractionMark(anchorX, anchorY, keyLabel) {
-    const x = clamp(anchorX, 18, canvas.width - 18);
-    const y = clamp(anchorY - 44, 18, canvas.height - 18);
+    const x = clamp(anchorX, 18, viewport.width - 18);
+    const y = clamp(anchorY - 44, 18, viewport.height - 18);
     context.save();
     context.globalAlpha = 0.28;
     context.fillStyle = "#171020";

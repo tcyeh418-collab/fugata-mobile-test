@@ -1,25 +1,31 @@
-import { roomFootprints } from "./space.js?v=room01-theme-replay-v1";
+import {isDarkRoom6State,darkRoom6Walls} from './dark-room6-layout.js';
+import {isDarkRoom5State,darkRoom5Walls} from './dark-room5-layout.js';
+import {isDarkRoom4State,darkRoom4Walls} from './dark-room4-layout.js';
+import { roomFootprints } from "./space.js";
+import {isDarkRoom1State,darkRoom1Walls} from './dark-room1-layout.js';
+import {isDarkRoom2State,darkRoom2Walls} from './dark-room2-layout.js';
+import {isDarkRoom3State,darkRoom3Walls} from './dark-room3-layout.js';
 import { ROOM05_ART, ROOM05_ENTRY, ROOM05_EXIT } from "./room05-art.js";
 import { ROOM06_ART, ROOM06_ENTRY, ROOM06_EXIT, ROOM06_ENDING_TRIGGER } from "./room06-art.js";
 import {
   ROOM02_DOORWAY,
   ROOM02_VIEWPORT,
   ROOM02_WALKABLE_WALLS,
-} from "./room02-layout.js?v=room02-perspective-exit-v1";
+} from "./room02-layout.js";
 import {
   ROOM01_DOORWAY,
   ROOM01_WALKABLE,
-} from "./room01-layout.js?v=room01-theme-replay-v1";
+} from "./room01-layout.js";
 import {
   ROOM03_DOORWAY,
   ROOM03_WALKABLE,
   ROOM03_WALKABLE_WALLS,
-} from "./room03-layout.js?v=room03-side-gate-v1";
+} from "./room03-layout.js";
 import {
   ROOM04_DOORWAY,
   ROOM04_WALKABLE,
   ROOM04_WALKABLE_WALLS,
-} from "./room04-layout.js?v=room04-movement-fixes-v6";
+} from "./room04-layout.js";
 
 function room02Wall(id, rect) {
   return Object.freeze({ id, x: rect.x, y: rect.y, width: rect.width, height: rect.height });
@@ -93,6 +99,12 @@ export const endingTrigger = { id: "ending-trigger", ...ROOM06_ENDING_TRIGGER };
 
 export function activeWalls(state) {
   const room = state.gameProgress.currentRoom;
+  if(isDarkRoom1State(state))return [...darkRoom1Walls(state),...roomFootprints(state)];
+  if(isDarkRoom2State(state))return [...darkRoom2Walls(state),...roomFootprints(state)];
+  if(isDarkRoom3State(state))return [...darkRoom3Walls(state),...roomFootprints(state)];
+  if(isDarkRoom6State(state))return [...darkRoom6Walls(state),...roomFootprints(state)];
+  if(isDarkRoom5State(state))return [...darkRoom5Walls(state),...roomFootprints(state)];
+  if(isDarkRoom4State(state))return [...darkRoom4Walls(state),...roomFootprints(state)];
   if (room >= 5) {
     const walls = staticWalls.filter(w => w.id.startsWith(`room${room}-`) || (room === 5 && w.id.startsWith("corridor05-")));
     if (state[`door0${room}`].status !== "open") walls.push(room === 5 ? door05Collider : door06Collider);

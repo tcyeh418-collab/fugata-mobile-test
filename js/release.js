@@ -1,1 +1,1 @@
-export const RELEASE = {"version":"1.2.8-playtest.1","release":"44be58b97d83caf3"};
+export const RELEASE = {"version":"1.3.1-playtest.1","release":"0ca98d4934d69f05"};

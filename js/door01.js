@@ -1,7 +1,7 @@
-import { allowedTarget } from "./interaction-targets.js?v=room01-theme-replay-v1";
+import { allowedTarget } from "./interaction-targets.js";
 import { distanceBetween, pointInRect } from "./collision.js";
 import { COMPLETION_DIALOGUE, WRONG_HINTS, advanceDialogue, startDialogue } from "./dialogue.js";
-import { heldFragment, setMessage } from "./state.js?v=room01-theme-replay-v1";
+import { heldFragment, setMessage } from "./state.js";
 
 const CHECK_DURATION = 0.45;
 const REJECT_DURATION = 1;
