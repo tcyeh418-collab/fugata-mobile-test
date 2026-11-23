@@ -1,10 +1,17 @@
+import {DARK_ROOM6} from './dark-room6-layout.js';
+import {chapterNextRoom,isIntegratedState,completedChapterCount} from './chapter-route.js';
+import {isDarkRoom5State,darkRoom5ExitTrigger,DARK_ROOM5} from './dark-room5-layout.js';
+import {isDarkRoom4State,darkRoom4ExitTrigger,DARK_ROOM4} from './dark-room4-layout.js';
 import { placeCompanions } from "./companions.js";
+import {isDarkRoom1State,darkRoom1ExitTrigger} from './dark-room1-layout.js';
+import {isDarkRoom2State,darkRoom2ExitTrigger,DARK_ROOM2} from './dark-room2-layout.js';
+import {isDarkRoom3State,darkRoom3ExitTrigger,DARK_ROOM3} from './dark-room3-layout.js';
 import { ROOM05_LANDMARKS, ROOM05_EXIT_TRIGGER } from "./room05-art.js";
 import { ROOM06_LANDMARKS } from "./room06-art.js";
-import { ROOM02_DOORWAY } from "./room02-layout.js?v=room02-perspective-exit-v1";
-import { ROOM01_DOORWAY } from "./room01-layout.js?v=room01-theme-replay-v1";
-import { ROOM03_DOORWAY } from "./room03-layout.js?v=room03-side-gate-v1";
-import { ROOM04_DOORWAY } from "./room04-layout.js?v=room04-movement-fixes-v6";
+import { ROOM02_DOORWAY } from "./room02-layout.js";
+import { ROOM01_DOORWAY } from "./room01-layout.js";
+import { ROOM03_DOORWAY } from "./room03-layout.js";
+import { ROOM04_DOORWAY } from "./room04-layout.js";
 import { roomCopy, roomTransitionTitle } from "./room-copy.js";
 
 export const ROOM_TRANSITION_TIMING = Object.freeze({
@@ -33,9 +40,28 @@ export const ROOM_TRANSITION_TRIGGERS = Object.freeze([
 export function maybeStartRoomTransition(state, audio) {
   const transition = state.roomTransition;
   if (transition.active) return false;
-  const trigger = ROOM_TRANSITION_TRIGGERS.find(
+  let trigger = ROOM_TRANSITION_TRIGGERS.find(
     (item) => item.fromRoom === state.gameProgress.currentRoom,
   );
+  if(trigger&&isDarkRoom1State(state))trigger=darkRoom1ExitTrigger(state,trigger);
+  if(trigger&&isDarkRoom2State(state))trigger=darkRoom2ExitTrigger(state,trigger);
+  if(trigger&&isDarkRoom5State(state))trigger=darkRoom5ExitTrigger(state,trigger);
+  if(trigger&&isDarkRoom4State(state))trigger=darkRoom4ExitTrigger(state,trigger);
+  if(trigger&&isDarkRoom3State(state))trigger=darkRoom3ExitTrigger(state,trigger);
+  if(trigger?.fromRoom===1&&state.room02Presentation?.kind==='dark-v1')
+    trigger={...trigger,entryX:DARK_ROOM2.entry.x,entryY:DARK_ROOM2.entry.y};
+  if(trigger?.fromRoom===2&&state.room03Presentation?.kind==='dark-v1')
+    trigger={...trigger,entryX:DARK_ROOM3.entry.x,entryY:DARK_ROOM3.entry.y};
+  if(trigger?.fromRoom===3&&state.room04Presentation?.kind==='dark-v1')
+    trigger={...trigger,entryX:DARK_ROOM4.entry.x,entryY:DARK_ROOM4.entry.y};
+  if(trigger?.fromRoom===4&&state.room05Presentation?.kind==='dark-v1')
+    trigger={...trigger,entryX:DARK_ROOM5.entry.x,entryY:DARK_ROOM5.entry.y};
+  if(trigger?.fromRoom===5&&state.room06Presentation?.kind==='dark-v1')
+    trigger={...trigger,entryX:DARK_ROOM6.entry.x,entryY:DARK_ROOM6.entry.y};
+  if(trigger&&isIntegratedState(state)){
+    const next=chapterNextRoom(state),entry={2:DARK_ROOM2.entry,3:DARK_ROOM3.entry,4:DARK_ROOM4.entry,5:DARK_ROOM5.entry,6:DARK_ROOM6.entry}[next];
+    trigger={...trigger,toRoom:next,entryX:entry.x,entryY:entry.y,title:`${roomCopy(next,state).action}\n${roomCopy(next,state).concept}`};
+  }
   const minY = trigger?.minY ?? 270;
   const maxY = trigger?.maxY ?? 390;
   const minX = trigger?.minX ?? trigger?.x;
@@ -119,6 +145,7 @@ export function updateRoomTransition(state, deltaTime) {
       transition.roomChanged = true;
       state.gameProgress.currentRoom = transition.toRoom;
       state.gameProgress.currentDoor = transition.toRoom;
+      if(isIntegratedState(state))state.gameProgress.doorsCompleted=completedChapterCount(state);
       state.player.x = transition.entryX;
       state.player.y = transition.entryY ?? 320;
       placeCompanions(state);
@@ -156,7 +183,7 @@ export function roomTransitionView(state) {
     active: transition.active,
     opacity: transition.opacity,
     showTitle: transition.active && transition.roomChanged,
-    eyebrow: transition.toRoom ? `${roomCopy(transition.toRoom).ordinal}／06` : "",
+    eyebrow: transition.toRoom ? `${roomCopy(transition.toRoom,state).ordinal}／06` : "",
     title: transition.title ?? "",
   };
 }

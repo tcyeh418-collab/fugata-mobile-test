@@ -1,0 +1,20 @@
+{
+  "id": "fugata-room01-wide-v1",
+  "status": "playable-art-trial-awaiting-user-review",
+  "createdAt": "2026-11-09",
+  "asset": "observatory-background-wide-v1.png",
+  "sourceDimensions": {"width": 1672, "height": 941},
+  "render": {"minimumWidth": 1280, "height": 720, "width": "720 * available stage aspect ratio, rounded; minimum 1280", "fit": "central plate preserved; new environment extends to stage edges"},
+  "world": {"width": 960, "height": 640, "cameraX": -120},
+  "projection": {"uniformScale": 1.125, "offsetX": "(renderWidth - 1080) / 2", "offsetY": 0},
+  "extension": "observatory-extension-v2.png",
+  "reference": "observatory-background-v2.png",
+  "generation": "built-in image_gen, precise-object-edit, horizontal environment extension",
+  "layers": "Environment plate only; existing station, gate, player and NPC atlases remain independent runtime layers.",
+  "limits": [
+    "Room 1 only; other rooms return to the current 3:2 presentation.",
+    "New side architecture is decorative; original movement bounds and puzzle rules are retained.",
+    "Generated environment details differ slightly from the reference; final art approval remains pending.",
+    "This asset is not a new foreground occlusion mask or new character animation set."
+  ]
+}

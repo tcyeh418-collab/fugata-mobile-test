@@ -13,3 +13,4 @@ export function requestedLocalRoom03GateState(){ return null; }
 export function requestedLocalRoom04State(){ return null; }
 export function requestedLocalTransitionState(){ return null; }
 export function createLocalTestRoomState(){ throw new Error('Local QA mode is not included in this playtest package.'); }
+export function createIntegratedTestRoomState(){ throw new Error('Local QA mode is not included in this playtest package.'); }

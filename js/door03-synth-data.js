@@ -1,7 +1,7 @@
 import {
   ROOM03_DEVICE_GEOMETRY,
   ROOM03_PLACEMENTS,
-} from "./room03-layout.js?v=room03-side-gate-v1";
+} from "./room03-layout.js";
 
 export const DOOR03_SIGNAL_TYPES = Object.freeze({
   audio: Object.freeze({ id: "audio", label: "音訊訊號", color: "#f59b45" }),

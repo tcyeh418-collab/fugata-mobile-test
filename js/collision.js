@@ -1,7 +1,7 @@
-export function moveWithCollisions(player, direction, deltaTime, walls) {
+export function moveWithCollisions(player, direction, deltaTime, walls,axisScale={x:1,y:1}) {
   const length = Math.hypot(direction.x, direction.y) || 1;
-  const dx = (direction.x / length) * player.speed * deltaTime;
-  const dy = (direction.y / length) * player.speed * deltaTime;
+  const dx = (direction.x / length) * player.speed * deltaTime * axisScale.x;
+  const dy = (direction.y / length) * player.speed * deltaTime * axisScale.y;
 
   // Resolve only axes that actually moved. Zero horizontal input must never
   // eject an overlapping actor to the far end of a horizontal wall.

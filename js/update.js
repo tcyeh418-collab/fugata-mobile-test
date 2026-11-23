@@ -1,9 +1,12 @@
-import {syncSelection,targets,reachable} from "./interaction-targets.js?v=room01-theme-replay-v1";
-import {setMessage} from "./state.js?v=room01-theme-replay-v1";
-import { recoverPlayer, castFor, constrainCast } from "./space.js?v=room01-theme-replay-v1";
+import {isDarkRoom6State,darkRoom6EndingTrigger} from './dark-room6-layout.js';
+import {isIntegratedState,completedChapterCount} from './chapter-route.js';
+import {isDarkRoom4State,darkRoom4ArtToWorld,DARK_ROOM4} from './dark-room4-layout.js';
+import {syncSelection,targets,reachable} from "./interaction-targets.js";
+import {setMessage} from "./state.js";
+import { recoverPlayer, castFor, constrainCast } from "./space.js";
 import { updateCompanions } from "./companions.js";
 import { updateNpcAnimation } from "./character/npc-v3.js";
-import { handleEnter, handleListenOrSubmit, updateDoor01 } from "./door01.js?v=room01-theme-replay-v1";
+import { handleEnter, handleListenOrSubmit, updateDoor01 } from "./door01.js";
 import { handleDoor02Enter, handleDoor02Listen, updateDoor02 } from "./door02.js";
 import {
   cancelDoor03Patch,
@@ -17,7 +20,7 @@ import {
   handleDoor04ListenOrTest,
   stopDoor04Sequence,
   updateDoor04,
-} from "./door04.js?v=room04-movement-fixes-v6";
+} from "./door04.js";
 import {
   handleDoor05Enter,
   handleDoor05Listen,
@@ -33,16 +36,17 @@ import {
 } from "./door06.js";
 import { advanceDialogue } from "./dialogue.js";
 import { updatePlayer } from "./player.js";
-import { activeWalls, endingTrigger, updateCurrentRoom } from "./rooms.js?v=room01-theme-replay-v1";
-import { maybeStartRoomTransition, updateRoomTransition } from "./room-transition.js?v=room01-theme-replay-v1";
-import { updateInteractionHint, updateTransientUi } from "./ui.js?v=room01-theme-replay-v1";
-import { ROOM04_CHARACTER_SPOTS } from "./room04-layout.js?v=room04-movement-fixes-v6";
+import { activeWalls, endingTrigger, updateCurrentRoom } from "./rooms.js";
+import { maybeStartRoomTransition, updateRoomTransition } from "./room-transition.js";
+import { updateInteractionHint, updateTransientUi } from "./ui.js";
+import { ROOM04_CHARACTER_SPOTS } from "./room04-layout.js";
 
 export function updateGame(state, input, audio, deltaTime, options = {}) {
   state.elapsedTime += deltaTime;
   if (state.phase !== "game") return;
-  if (state.tutorialOpen){input.reset();return;}
+  if (state.tutorialOpen||state.ui.feedbackDialogOpen||state.ui.rewardsOpen){input.reset();return;}
 
+  if(state.ui.room04ReferenceOpen){input.reset();updateDoor04(state,deltaTime,audio);return;}
   recoverPlayer(state,activeWalls(state));
   const oldCast=structuredClone(castFor(state)??{});
   syncSelection(state);
@@ -158,6 +162,7 @@ export function updateGame(state, input, audio, deltaTime, options = {}) {
   updateRoom04Characters(state, deltaTime);
   updateDoor05(state, deltaTime, audio);
   updateDoor06(state, deltaTime, audio);
+  if(isIntegratedState(state))state.gameProgress.doorsCompleted=completedChapterCount(state);
   maybeStartRoomTransition(state, audio);
   if (state.roomTransition.active) updateRoomTransition(state, deltaTime);
   else updateCurrentRoom(state);
@@ -200,13 +205,15 @@ export function updateGame(state, input, audio, deltaTime, options = {}) {
     audio.stopDoor06Audio?.();
   }
 
+  const finalTrigger=isDarkRoom6State(state)?darkRoom6EndingTrigger(state):endingTrigger;
   if (
     state.gameProgress.currentRoom === 6
     && state.door06.exitOpen
     && !state.dialogue.active
-    && state.player.x >= endingTrigger.x
-    && state.player.y >= endingTrigger.y
-    && state.player.y <= endingTrigger.y + endingTrigger.height
+    && state.player.x >= finalTrigger.x
+    && (!isDarkRoom6State(state)||state.player.x<=finalTrigger.x+finalTrigger.width)
+    && state.player.y >= finalTrigger.y
+    && state.player.y <= finalTrigger.y + finalTrigger.height
   ) {
     beginDoor06Ending(state, audio);
   }
@@ -327,7 +334,8 @@ export function updateRoom04Characters(state, deltaTime) {
     spots = ROOM04_CHARACTER_SPOTS.loom;
   }
 
-  if (holding && state.room04Characters.leroy.pose === "placing") {
+  if(isDarkRoom4State(state))spots=Object.fromEntries(Object.entries(DARK_ROOM4.characters).map(([key,p])=>[key,darkRoom4ArtToWorld(p)]));
+  if (holding && state.room04Characters.leroy.pose === "placing" && !isDarkRoom4State(state)) {
     const slot=state.door04Slots.reduce((best,item)=>Math.hypot(state.player.x-item.x,state.player.y-item.y)<Math.hypot(state.player.x-best.x,state.player.y-best.y)?item:best);
     spots={...spots,leroy:{x:slot.x+60,y:slot.y+65}};
   }

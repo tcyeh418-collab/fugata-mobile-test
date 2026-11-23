@@ -1,9 +1,13 @@
+import {isDarkRoom6State,DARK_ROOM6,darkRoom6ArtToWorld} from './dark-room6-layout.js';
+import {isDarkRoom5State,DARK_ROOM5,darkRoom5ArtToWorld} from './dark-room5-layout.js';
 // Room 5/6 authored event targets from LogicCode six-room integration.
 // Room 1–4 retain their newer, independently authored behaviours.
 import { ROOM05_ART, ROOM05_LANDMARKS, imageToWorld } from './room05-art.js';
 import { ROOM06_ART, ROOM06_LANDMARKS, room06ImageToWorld } from './room06-art.js';
 import { updateNpcAnimation } from './character/npc-v3.js';
 export function companionTargets(state) {
+ if(isDarkRoom6State(state))return Object.fromEntries(Object.entries(DARK_ROOM6.characters).map(([key,p])=>[key,darkRoom6ArtToWorld(p)]));
+ if(isDarkRoom5State(state))return Object.fromEntries(Object.entries(DARK_ROOM5.characters).map(([key,p])=>[key,darkRoom5ArtToWorld(p)]));
  const room=state.gameProgress.currentRoom;
  if(room<5)return null;
  const view=room===5?ROOM05_ART.clip:ROOM06_ART.clip;

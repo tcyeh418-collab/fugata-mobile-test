@@ -1,3 +1,4 @@
+import {chapterOrdinal,isIntegratedState} from './chapter-route.js';
 export const ROOM_COPY = Object.freeze({
   1: Object.freeze({
     ordinal: "第一室",
@@ -37,8 +38,11 @@ export const ROOM_COPY = Object.freeze({
   }),
 });
 
-export function roomCopy(roomNumber) {
-  return ROOM_COPY[roomNumber] ?? ROOM_COPY[1];
+export function roomCopy(roomNumber,state=null) {
+  const base=ROOM_COPY[roomNumber]??ROOM_COPY[1];
+  if(!isIntegratedState(state))return base;
+  const ordinal=['','第一室','第二室','第三室','第四室','第五室','第六室'][chapterOrdinal(state,roomNumber)];
+  return {...base,ordinal,full:`${ordinal}｜${base.action}｜${base.concept}`};
 }
 
 export function roomTransitionTitle(roomNumber) {

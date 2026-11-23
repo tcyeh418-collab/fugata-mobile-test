@@ -1,9 +1,10 @@
 import { isGameplayNarration } from './feedback-policy.js';
-import { restoreDoor04Ownership } from './door04.js?v=room04-movement-fixes-v6';
+import {isIntegratedState} from './chapter-route.js';
+import { restoreDoor04Ownership } from './door04.js';
 import { backupBeforeWrite } from './save-backups.js';
 import { ROOM05_LANDMARKS } from './room05-art.js';
 import { ROOM06_LANDMARKS } from './room06-art.js';
-import { createInitialState } from './state.js?v=room01-theme-replay-v1';
+import { createInitialState } from './state.js';
 export const PROGRESS_KEY = 'fugata.progress.v1';
 // Explicit root allowlist keeps character, audio devices and renderer state out of chapter saves.
 const KEYS = ['elapsedTime','gameProgress','player','door01','door02','door03','door04','door05','door06','roomTransition','fragments','echoTowers','door03Modules','door04Capsules','door04Slots','door05Nodes','door06Relays','door06Memories','dialogue','ui'];
@@ -27,15 +28,15 @@ export function progressSnapshot(state) {
  for(const key of ['fragments','echoTowers','door03Modules','door04Capsules','door06Relays','door06Memories'])for(const item of data[key]){if('isPlaying'in item)item.isPlaying=false;if('playing'in item)item.playing=false;if('isInspecting'in item)item.isInspecting=false;}
  for(const room of [2,3,4,5,6]){const door=data[`door0${room}`];if(door?.completed)door.completionDialogueShown=true;}
  if(data.dialogue.active&&isGameplayNarration(data.dialogue.sequenceId??''))data.dialogue={...createInitialState(()=>.5).dialogue};
- data.ui.message=null; data.ui.saveError=null; data.ui.hintsVisible=false; data.ui.completionMarker=null; data.ui.contextHint={...createInitialState(()=>.5).ui.contextHint};
- return {version:1,layout:'playthrough-v3',data};
+ data.ui.message=null; data.ui.saveError=null; data.ui.rewardsOpen=false; data.ui.hintsVisible=false; data.ui.completionMarker=null; data.ui.contextHint={...createInitialState(()=>.5).ui.contextHint};
+ return {version:1,layout:isIntegratedState(state)?'playthrough-v4-dark':'playthrough-v3',data};
 }
 export function saveProgress(storage,state) {
  // Keep the last stable side of a room transfer; never restore a half-black transition.
  if(state.roomTransition.active)return false;
  const serialized=JSON.stringify(progressSnapshot(state));
  const existing=storage.getItem(PROGRESS_KEY);
- if(existing){try{if(JSON.parse(existing).layout!=='playthrough-v3')backupBeforeWrite(storage,PROGRESS_KEY,serialized);}catch{backupBeforeWrite(storage,PROGRESS_KEY,serialized);}}
+ if(existing){try{if(JSON.parse(existing).layout!==progressSnapshot(state).layout)backupBeforeWrite(storage,PROGRESS_KEY,serialized);}catch{backupBeforeWrite(storage,PROGRESS_KEY,serialized);}}
  storage.setItem(PROGRESS_KEY,serialized);return true;
 }
 export function loadProgress(storage) {

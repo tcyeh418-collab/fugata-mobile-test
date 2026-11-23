@@ -1,11 +1,20 @@
+import {createChapterDialogue} from './chapter-dialogue.js';
+import {createRewardCollection} from './reward-ui.js';
+import {configureDarkChapter,prepareIntegratedChapter,installDarkChapterScreens} from './chapter-dark.js';
+import {integratedChapterRequested,chapterOrdinal,mobileInterfaceRequested} from './chapter-route.js';
+import {createIntegratedTestRoomState} from './test-mode.js';
+import {createFeedbackDialog} from './feedback-dialog.js';
+import {createRoom04ReferencePlayer} from './room04-reference-player.js';
 import { currentRoomAudioStatus } from './feedback-policy.js';
+import { installWideRoom1Shell, isWideRoom1Trial } from './wide-room1.js';
+import {isDarkRoom1Trial} from './dark-room1-layout.js';
 import { createMemoryConfirmation } from './memory-confirmation.js';
-import {createRoomHelp} from "./room-help.js?v=hint-toggle-playtest-v1";
-import {createSequenceControls} from "./room04-controls.js?v=room04-movement-fixes-v6";
+import {createRoomHelp} from "./room-help.js";
+import {createSequenceControls} from "./room04-controls.js";
 import {createFullscreenTools} from "./fullscreen-tools.js";
-import {installPointerControls} from "./pointer-controls.js?v=room01-theme-replay-v1";
+import {installPointerControls} from "./pointer-controls.js";
 import { backupBeforeWrite } from "./save-backups.js";
-import { controlDoor04Reference } from "./door04.js?v=room04-movement-fixes-v6";
+import { controlDoor04Reference } from "./door04.js";
 import { RELEASE } from './release.js';
 import { isolatedStorage, isolatedSessionStorage } from './test-storage.js';
 import {loadWalkArt,supportsWalk,walkCacheInfo,walkFrame} from './character/walk-v14.js';
@@ -13,10 +22,10 @@ import {isTrialCharacter} from './character/trial-model.js';
 import { createCharacterCreator } from "./character/creator.js";
 import { loadCharacter, readCharacterForConfirmation, fixedCharacterDraft, instrumentVisible } from "./character/model.js";
 import { CHARACTER_FLOW, createCharacterRouter } from "./character/flow.js";
-import { loadProgress, saveProgress, PROGRESS_KEY } from "./progress-save.js?v=room01-theme-replay-v1";
-import { createAudioSystem } from "./audio.js?v=room01-theme-replay-v1";
+import { loadProgress, saveProgress, PROGRESS_KEY } from "./progress-save.js";
+import { createAudioSystem } from "./audio.js";
 import { INTRO_DIALOGUE, startDialogue } from "./dialogue.js";
-import { nearestPedestal } from "./door01.js?v=room01-theme-replay-v1";
+import { nearestPedestal } from "./door01.js";
 import { nearestEchoTower, nearestSubjectTerminal } from "./door02.js";
 import { door03PortById, nearestDoor03Module, nearestDoor03Port } from "./door03.js";
 import { createDoor03PatchGuide } from "./door03-guide.js";
@@ -28,7 +37,7 @@ import {
   nearDoor04Test,
   nearestDoor04Pedestal,
   nearestDoor04Slot,
-} from "./door04.js?v=room04-movement-fixes-v6";
+} from "./door04.js";
 import {
   door05Phase,
   door05SelectedAccents,
@@ -45,13 +54,13 @@ import {
 } from "./door06.js";
 import { createEndingController } from "./ending.js";
 import { createInput } from "./input.js";
-import { createRenderer } from "./render.js?v=room01-theme-replay-v1";
+import { createRenderer } from "./render.js";
 import {
   createRoomProgressController,
   createRoomTransitionController,
 } from "./room-progress.js";
 import { roomCopy } from "./room-copy.js";
-import { createInitialState, heldFragment, setMessage } from "./state.js?v=room01-theme-replay-v1";
+import { createInitialState, heldFragment, setMessage } from "./state.js";
 import {
   createLocalTestRoomState,
   isLocalTestMode,
@@ -61,9 +70,9 @@ import {
   requestedLocalRoom04State,
   requestedLocalTestRoom,
   requestedLocalTransitionState,
-} from "./test-mode.js?v=room01-theme-replay-v1";
-import { createGameUi, setAudioNotice } from "./ui.js?v=room01-theme-replay-v1";
-import { updateGame } from "./update.js?v=room01-theme-replay-v1";
+} from "./test-mode.js";
+import { createGameUi, setAudioNotice } from "./ui.js";
+import { updateGame } from "./update.js";
 
 const titleScreen = document.querySelector("#title-screen");
 const gameScreen = document.querySelector("#game-screen");
@@ -81,7 +90,7 @@ const localTestSelector = document.querySelector("#local-test-room-selector");
 const localTestRoom = document.querySelector("#local-test-room");
 const localTestRoomGo = document.querySelector("#local-test-room-go");
 const fullscreenButton = document.querySelector("#toggle-fullscreen");
-const mobileRoom1Enabled = new URLSearchParams(window.location.search).get("mobile") === "room1";
+const mobileRoom1Enabled = mobileInterfaceRequested(window.location);
 if (mobileRoom1Enabled) {
   document.documentElement.classList.add("mobile-room1");
   const viewport = document.querySelector('meta[name="viewport"]');
@@ -92,6 +101,7 @@ if (mobileRoom1Enabled) {
   document.head.append(mobileStyles);
 }
 const localTestEnabled = isLocalTestMode(window.location);
+const integratedChapter=integratedChapterRequested(window.location);
 const autoTestRoom = requestedLocalTestRoom(window.location);
 const autoEndingPreview = requestedLocalEndingPreview(window.location);
 const autoRoom03GateState = requestedLocalRoom03GateState(window.location);
@@ -140,6 +150,7 @@ if (!(canvas instanceof HTMLCanvasElement) || !(fullTrack instanceof HTMLAudioEl
 
 let storage;
 try { storage = window.localStorage; } catch { storage = {getItem:()=>null,setItem:()=>{throw new Error("Storage unavailable");},removeItem:()=>{}}; }
+const persistentStorage=storage;
 const saveCheckEnabled=localTestEnabled && new URLSearchParams(location.search).get('savecheck')==='1';
 if (saveCheckEnabled) storage=isolatedSessionStorage(window.sessionStorage);
 else if (localTestEnabled) storage = isolatedStorage(storage, freshLocalTestStorage);
@@ -151,6 +162,7 @@ releaseLabel.append(' · ', hubLink);
 if (localTestingAvailable) document.body.prepend(releaseLabel);
 let resumedProgress = localTestEnabled && !saveCheckEnabled ? null : loadProgress(storage);
 let state = resumedProgress || createInitialState();
+if(integratedChapter)prepareIntegratedChapter(state,{restored:Boolean(resumedProgress)});
 state.ui.reducedMotion = reducedMotionEnabled;
 state.character = loadCharacter(storage);
 if (resumedProgress || state.character) startButton.textContent = "繼續遊戲";
@@ -214,6 +226,8 @@ function persistProgress() {
 }
 window.addEventListener("pagehide",()=>{persistProgress();audio.stopAll();});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)persistProgress();});
+if (isWideRoom1Trial(window.location)) canvas.dataset.artTrial = 'wide-v1';
+if (isDarkRoom1Trial(window.location)) canvas.dataset.artTrial = 'dark-v1';
 const renderer = createRenderer(canvas, {
   reducedMotion: reducedMotionEnabled,
   externalRoom01Ui: mobileRoom1Enabled,
@@ -371,7 +385,7 @@ if (autoEndingPreview) {
     localTestSelector.dataset.autoRoom = String(autoTestRoom);
     void openLocalTestRoom(autoTestRoom, { resumeAudio: false });
   } else {
-    localTestSelector.hidden = false;
+    localTestSelector.hidden = isDarkRoom1Trial(window.location);
   }
 }
 
@@ -392,6 +406,7 @@ const enterDestination = createCharacterRouter({
     await loadWalkArt(character);
     if (!supportsWalk(character)) throw new Error('Character confirmation required');
     state.character = character;
+    if(!integratedChapter&&isDarkRoom1Trial(window.location)&&!hasEnteredGame&&!resumedProgress)configureDarkChapter(state);
     titleScreen.hidden = true;
     gameScreen.hidden = false;
     state.phase = "game";
@@ -463,7 +478,7 @@ startButton.addEventListener("click", async () => {
   }
 });
 function characterEditAvailable() {
-  return state.phase === "game" && !state.roomTransition.active && !state.tutorialOpen && !state.dialogue.active
+  return state.phase === "game" && !state.ui.rewardsOpen && !state.roomTransition.active && !state.tutorialOpen && !state.dialogue.active
     && !["preparing","testing","reference-playing"].includes(state.door04.status)
     && !["testing","completion-spinning","completion-hold","launching"].includes(state.door05.status)
     && !["relay-playing","relay-replay","reference-playing","reconstructing"].includes(state.door06.status)
@@ -482,8 +497,15 @@ editCharacter.addEventListener("click",async ()=>{
 });
 
 const roomHelp=createRoomHelp(()=>state,input,persistProgress,storage);
+installWideRoom1Shell(canvas, gameScreen);
+installDarkChapterScreens();
 const sequenceControls=createSequenceControls(()=>state,audio,input);
+const referencePlayer=createRoom04ReferencePlayer(()=>state,audio,input,canvas);
 const memoryConfirmation=createMemoryConfirmation(()=>state,audio,input,canvas);
+const feedbackDialog=createFeedbackDialog(()=>state,input,canvas);
+const chapterDialogue=createChapterDialogue(()=>state,input,canvas);
+const rewardCollection=createRewardCollection({getState:()=>state,input,canvas,sourceStorage:persistentStorage,
+  preview:localTestEnabled,demo:localTestEnabled&&new URLSearchParams(location.search).get('rewardsPreview')==='1'});
 const pointerControls=installPointerControls(canvas,()=>state,input,{
   minimumCssHitSize: mobileRoom1Enabled ? 44 : 0,
 });
@@ -499,7 +521,7 @@ const fullscreenTools=createFullscreenTools({
 });
 let mobileRoom1Ui = null;
 if (mobileRoom1Enabled) {
-  import("../mobile/room1-ui.js?v=9").then(({ installMobileRoom1Ui }) => {
+  import("../mobile/room1-ui.js").then(({ installMobileRoom1Ui }) => {
     mobileRoom1Ui = installMobileRoom1Ui({
       canvas,
       gameScreen,
@@ -517,6 +539,9 @@ function frame(now) {
   state.door05.rafIntervalMs = now - previousTime;
   previousTime = now;
   updateGame(state, input, audio, deltaTime, { mobileRoom1: mobileRoom1Enabled });
+  rewardCollection.render(state);
+  chapterDialogue.render(state);
+  feedbackDialog.render(state);
   if (state.phase === "game") {
     renderer.render(state);
     gameUi.render(state);
@@ -542,6 +567,7 @@ function frame(now) {
   memoryConfirmation.render(state);
   refreshAudioNotice();
   sequenceControls.render(state);
+  referencePlayer.render(state);
   fullscreenTools.render(state);
   syncDiagnosticState();
   animationFrameId = requestAnimationFrame(frame);
@@ -551,6 +577,7 @@ function restartChapter() {
   audio.stopAll();
   endingController.hide();
   state = createInitialState();
+  if(integratedChapter)prepareIntegratedChapter(state);
   state.ui.reducedMotion = reducedMotionEnabled;
   state.character = loadCharacter(storage);
   resumedProgress = null;
@@ -583,11 +610,13 @@ async function openLocalTestRoom(room, { resumeAudio = true } = {}) {
   if (!localTestEnabled) return false;
   audio.stopAll();
   endingController.hide();
-  state = createLocalTestRoomState(room, Math.random, {
+  state = (integratedChapter?createIntegratedTestRoomState:createLocalTestRoomState)(room, Math.random, {
     room03GateState: room === 3 ? autoRoom03GateState : null,
     room04State: room === 4 ? autoRoom04State : null,
     transitionState: room === 2 ? autoTransitionState : null,
   });
+  if(integratedChapter)prepareIntegratedChapter(state,{room:state.gameProgress.currentRoom});
+  else if(isDarkRoom1Trial(window.location))configureDarkChapter(state,{room});
   state.ui.reducedMotion = reducedMotionEnabled;
   state.character = fixedCharacterDraft(readCharacterForConfirmation(storage) || {nickname:'旅人'});
   await loadWalkArt(state.character);
@@ -670,14 +699,15 @@ function syncDiagnosticState() {
     : null;
   const activeDoor05Phase = door05Phase(state.door05.activePhaseId);
   const door03Loop = audio.getDoor03LoopDiagnostics?.() ?? {};
+  const referenceTransport=audio.getDoor04ReferenceProgress?.()??{};
   const door05Diagnostics = audio.getDoor05Diagnostics?.() ?? {};
-  const activeRoomCopy = roomCopy(state.gameProgress.currentRoom);
+  const activeRoomCopy = roomCopy(state.gameProgress.currentRoom,state);
   const nextTitle = [1, 2, 3].includes(state.gameProgress.currentRoom)
-    ? `Room ${state.gameProgress.currentRoom}｜${activeRoomCopy.action}\n${activeRoomCopy.concept}`
+    ? `Room ${chapterOrdinal(state)}｜${activeRoomCopy.action}\n${activeRoomCopy.concept}`
     : `${activeRoomCopy.ordinal}｜${activeRoomCopy.action}\n${activeRoomCopy.concept}`;
   roomTitle.textContent = nextTitle;
   canvas.setAttribute("aria-label", nextTitle.replace("\n", "｜"));
-  doorNumber.textContent = `${String(state.gameProgress.currentRoom).padStart(2, "0")} / 06`;
+  doorNumber.textContent = `${String(chapterOrdinal(state)).padStart(2, "0")} / 06`;
   Object.assign(canvas.dataset, {
     characterAnimationFrame: supportsWalk(state.character) ? walkFrame(state) : -1,
     characterAnimationSupported: supportsWalk(state.character),
@@ -739,6 +769,16 @@ function syncDiagnosticState() {
     door04Assets: state.audio.door04AssetsStatus,
     loadedDoor04: String(state.audio.loadedDoor04),
     door04Status: state.door04.status,
+    door04Stage: state.door04.stage,
+    door04TestMode: state.door04.testMode??"stages",
+    door04ReferencePosition: Number(referenceTransport.position||0).toFixed(3),
+    door04ReferenceDuration: Number(referenceTransport.duration||0).toFixed(3),
+    door04ReferencePlayerOpen: String(Boolean(state.ui.room04ReferenceOpen)),
+    door04SlotResults: JSON.stringify(state.door04Slots.map(t=>{const r=state.door04.reviewResults?.[t.index];return r&&r.voiceId===t.assignedVoiceId?(r.correct?"correct":"incorrect"):null;})),
+    door04WrongAttempts: String(state.door04.wrongAttempts),
+    door04PreviewVoice: state.door04Capsules.find(v=>v.id===state.audio.door04PreviewVoiceId)?.displayLabel ?? "none",
+    door04ReferenceCompleted: String(state.door04.referenceCompleted),
+    door04ConfirmedEntries: String(state.door04.confirmedEntryCount),
     door04TestStatus: state.door04.testStatus,
     voicesPlaced: String(door04PlacedCount(state)),
     heldDoor04Voice: heldDoor04?.displayLabel ?? "none",

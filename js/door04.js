@@ -1,4 +1,5 @@
-import { allowedTarget } from "./interaction-targets.js?v=room04-movement-fixes-v6";
+import {isRoom04Review,room04ReviewResult,clearRoom04ReviewAt} from './room04-review.js';
+import { allowedTarget } from "./interaction-targets.js";
 import { distanceBetween } from "./collision.js";
 import {
   DOOR04_COMPLETION,
@@ -7,12 +8,12 @@ import {
   door04WrongHint,
   startDialogue,
 } from "./dialogue.js";
-import { setMessage } from "./state.js?v=room04-movement-fixes-v6";
+import { setMessage } from "./state.js";
 import { roomCompletionActive, showRoomCompletion } from "./completion-feedback.js";
 import {
   ROOM04_DEVICE_GEOMETRY,
   ROOM04_PLACEMENTS,
-} from "./room04-layout.js?v=room04-movement-fixes-v6";
+} from "./room04-layout.js";
 
 export const DOOR04_PREVIEW_MAX_DURATION = 15;
 export const DOOR04_CORRECT_ORDER = Object.freeze([
@@ -99,7 +100,7 @@ export function door04PlacedCount(state) {
   return state.door04.slotAssignments.filter(Boolean).length;
 }
 export function door04StageEntryCount(state) {
-  return DOOR04_STAGE_COUNTS[state.door04.stage] ?? 0;
+  return isRoom04Review(state)?4:DOOR04_STAGE_COUNTS[state.door04.stage] ?? 0;
 }
 
 export function door04TestConsoleLabel(testEntryCount) {
@@ -138,7 +139,7 @@ export function handleDoor04ListenOrTest(state, audio) {
   const slottedVoice = slot ? door04VoiceById(state, slot.assignedVoiceId) : null;
   if (slottedVoice) return previewVoice(state, audio, slottedVoice);
   if (!nearDoor04Test(state)) return false;
-  if (!state.door04.referenceCompleted) {
+  if (!isRoom04Review(state) && !state.door04.referenceCompleted) {
     setMessage(state, ["請先完整聽完參考混音，再測試排列。", "現在可以拿放、試聽音匣；參考混音可暫停與繼續。"], 3, "blocked");
     return true;
   }
@@ -146,7 +147,7 @@ export function handleDoor04ListenOrTest(state, audio) {
   const ready = state.door04.slotAssignments
     .slice(0, required).every(Boolean);
   if (!required || !ready) {
-    setMessage(state, [`請先完成目前的「${stageLabel(state.door04.stage)}」。`, `測試前請填滿位置 1–${roman(required - 1)}。`], 2.5, "blocked");
+    setMessage(state, isRoom04Review(state)?["請先將四個音匣全部放上編排台。", "放滿後一次測試完整排列。"]:[`請先完成目前的「${stageLabel(state.door04.stage)}」。`, `測試前請填滿位置 1–${roman(required - 1)}。`], 2.5, "blocked");
     return true;
   }
   return beginDoor04Test(state, audio);
@@ -154,10 +155,19 @@ export function handleDoor04ListenOrTest(state, audio) {
 
 export function handleDoor04PreviewState(state, next) {
   const door = state.door04;
-  if (next.kind !== "reference" || next.playing) return;
+  if (next.kind !== "reference") return;
+  if(next.playing){
+    door.referencePlaybackStatus='playing';
+    if(!['preparing','testing','opening','open'].includes(door.status))door.status='reference-playing';
+    return;
+  }
   if (next.completed) {
     door.referenceCompleted = true;
     door.referencePlaybackStatus = "completed";
+    if(isRoom04Review(state)){
+      if(!['preparing','testing','opening','open'].includes(door.status))door.status='arranging';
+      return;
+    }
     if (door.stage === "reference") {
       door.stage = "pair";
       door.testEntryCount = 2;
@@ -170,7 +180,7 @@ export function handleDoor04PreviewState(state, next) {
   } else {
     door.referencePlaybackStatus = next.reason === "paused" ? "paused" : door.referenceCompleted ? "completed" : "idle";
     if (!["preparing", "testing", "opening", "open"].includes(door.status)) {
-      door.status = door.referenceCompleted ? "arranging" : "reference-ready";
+      door.status = isRoom04Review(state)||door.referenceCompleted ? "arranging" : "reference-ready";
     }
   }
 }
@@ -178,15 +188,15 @@ export function handleDoor04PreviewState(state, next) {
 export function stopDoor04Sequence(state,audio) {
   state.door04.sequenceRequest=(state.door04.sequenceRequest||0)+1;
   audio.stopDoor04Test?.();
-  Object.assign(state.door04,{status:state.door04.referenceCompleted?'arranging':'reference-ready',testStatus:'idle',testElapsed:0,activeEntryCount:0,testProgress:0});
+  Object.assign(state.door04,{status:isRoom04Review(state)||state.door04.referenceCompleted?'arranging':'reference-ready',testStatus:'idle',testElapsed:0,activeEntryCount:0,testProgress:0});
   state.audio.door04TestPlaying=false;door04RestoreSlotStates(state);
 }
 export function beginDoor04Test(state, audio, restart=false) {
   const door=state.door04,count=door04StageEntryCount(state);
   if (['preparing','testing'].includes(door.status) && !restart)return false;
-  if (state.dialogue.active || state.tutorialOpen || ['rejected','opening','open'].includes(door.status) || !door.referenceCompleted || !count)return false;
+  if (state.dialogue.active || state.tutorialOpen || ['rejected','opening','open'].includes(door.status) || (!isRoom04Review(state)&&!door.referenceCompleted) || !count)return false;
   const voiceIds=door.slotAssignments.slice(0,count);
-  if(voiceIds.length!==count || !voiceIds.every(Boolean)){setMessage(state,['請先填滿本階段已解鎖的位置。'],3,'door');return false;}
+  if(voiceIds.length!==count || !voiceIds.every(Boolean)){setMessage(state,[isRoom04Review(state)?'請先放滿四個音匣，再一次測試完整排列。':'請先填滿本階段已解鎖的位置。'],3,'door');return false;}
   // Resolve the player's slots to stable asset keys; never reorder by label or answer.
   const audioKeys=voiceIds.map(id=>door04VoiceById(state,id)?.audioKey);
   if(audioKeys.some(key=>!key)){setDoor04AudioError(state,'音匣對應資料');return false;}
@@ -222,7 +232,7 @@ export function updateDoor04(state, deltaTime, audio) {
     const transport=audio.getDoor04TestProgress?.();
     if(!transport){Object.assign(door,{status:'arranging',testStatus:'idle',activeEntryCount:0});state.audio.door04TestPlaying=false;return;}
     door.testElapsed=transport.elapsed;door.testProgress=transport.progress;door.activeEntryCount=transport.index;
-    for(const slot of state.door04Slots)slot.visualState=slot.index===transport.index-1?'testing':slot.index<door.confirmedEntryCount?'correct-locked':slot.assignedVoiceId?'occupied':'empty';
+    for(const slot of state.door04Slots)slot.visualState=slot.index===transport.index-1?'testing':isRoom04Review(state)?room04ReviewResult(state,slot)??(slot.assignedVoiceId?'occupied':'empty'):slot.index<door.confirmedEntryCount?'correct-locked':slot.assignedVoiceId?'occupied':'empty';
     if(transport.completed)finishDoor04Test(state,audio);
     return;
   }
@@ -261,7 +271,7 @@ function handleSlotEnter(state, slot) {
     setMessage(state, [`位置 ${roman(slot.index)} 尚未解鎖。`, `請先完成「${stageLabel(door.stage)}」。`], 2.2, "blocked");
     return true;
   }
-  if (slot.index < door.confirmedEntryCount) {
+  if (!isRoom04Review(state) && slot.index < door.confirmedEntryCount) {
     setMessage(state, [`位置 ${roman(slot.index)} 已確認並鎖定。`, "已確認的位置不能更改。"], 2.2, "success");
     return true;
   }
@@ -292,6 +302,7 @@ function handleSlotEnter(state, slot) {
 }
 
 function assignVoiceToSlot(state, voice, slot) {
+  clearRoom04ReviewAt(state,slot.index);
   if (state.room04Presentation) state.room04Presentation.placementRemaining = 1.2;
   slot.assignedVoiceId = voice.id;
   state.door04.slotAssignments[slot.index] = voice.id;
@@ -303,6 +314,7 @@ function assignVoiceToSlot(state, voice, slot) {
 }
 
 function unassignToHand(state, voice, slot) {
+  clearRoom04ReviewAt(state,slot.index);
   slot.assignedVoiceId = null;
   state.door04.slotAssignments[slot.index] = null;
   slot.visualState = "empty";
@@ -328,6 +340,15 @@ function finishDoor04Test(state, audio) {
   const count = door.testEntryCount;
   const isMatch = (door.sequenceVoiceIds || state.door04.slotAssignments)
     .slice(0, count).every((voiceId, index) => voiceId === DOOR04_CORRECT_ORDER[index]);
+  if(isRoom04Review(state)){
+    door.reviewResults=state.door04Slots.map((slot,index)=>({voiceId:slot.assignedVoiceId,correct:door.sequenceVoiceIds[index]===DOOR04_CORRECT_ORDER[index]}));
+    door.confirmedEntryCount=door.reviewResults.filter(r=>r.correct).length;
+    for(const slot of state.door04Slots)slot.visualState=room04ReviewResult(state,slot);
+    if(!isMatch){
+      door.wrongAttempts++;door.status='rejected';door.rejectionRemaining=1;
+      setMessage(state,['紅環的位置需要調整，綠環的位置目前正確。','可取出或交換音匣，再一次測試四個位置。'],4,'rejected');return;
+    }
+  }
   if (isMatch) {
     door.confirmedEntryCount = count;
     for (let index = 0; index < count; index += 1) state.door04Slots[index].visualState = "correct-locked";
@@ -373,8 +394,8 @@ function finishDoor04Test(state, audio) {
 
 function door04RestoreSlotStates(state) {
   for (const slot of state.door04Slots) {
-    slot.visualState = slot.index < state.door04.confirmedEntryCount
-      ? "correct-locked" : slot.assignedVoiceId ? "occupied" : "empty";
+    slot.visualState = isRoom04Review(state)?room04ReviewResult(state,slot)??(slot.assignedVoiceId?'occupied':'empty'):
+      slot.index < state.door04.confirmedEntryCount ? "correct-locked" : slot.assignedVoiceId ? "occupied" : "empty";
   }
 }
 function stageLabel(stage) {
@@ -422,8 +443,9 @@ export function cancelDoor04Carry(state) {
   return true;
 }
 
-export function controlDoor04Reference(state, audio, restart = false) {
+export function controlDoor04Reference(state, audio, restart = false, {fromPlayer=false}={}) {
   if (isDoor04InputLocked(state) || state.dialogue.active || state.tutorialOpen) return false;
+  if(isRoom04Review(state)&&!fromPlayer){state.ui.room04ReferenceRequested=true;state.ui.room04ReferenceRestart=restart;return true;}
   if (!restart && state.door04.referencePlaybackStatus === "playing") {
     audio.pauseDoor04Reference?.();
     return true;

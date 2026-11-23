@@ -1,5 +1,5 @@
-import { allowedTarget } from "./interaction-targets.js?v=room04-low-desk-v2";
-import { ROOM05_LANDMARKS, room05RingPoint } from "./room05-art.js?v=room05-audible-clock-v1";
+import { allowedTarget } from "./interaction-targets.js";
+import { ROOM05_LANDMARKS, room05RingPoint } from "./room05-art.js";
 import { distanceBetween } from "./collision.js";
 import {
   DOOR05_COMPLETION,
@@ -7,7 +7,7 @@ import {
   DOOR05_WRONG_HINTS,
   startDialogue,
 } from "./dialogue.js";
-import { setMessage } from "./state.js?v=room04-low-desk-v2";
+import { setMessage } from "./state.js";
 import { roomCompletionActive, showRoomCompletion } from "./completion-feedback.js";
 
 export const DOOR05_EIGHTH_NOTE_SECONDS = 0.3;

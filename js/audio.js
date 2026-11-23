@@ -729,7 +729,7 @@ export function createAudioSystem(fullTrack, callbacks = {}) {
     const buffer = buffers.get("door04ReferenceMix");
     if (!buffer) return false;
     if (door04ReferenceSource && !restart) return true;
-    const offset = restart ? 0 : door04ReferenceOffset;
+    const offset = restart || door04ReferenceOffset >= buffer.duration ? 0 : door04ReferenceOffset;
     stopPreview();
     stopDoor04Voice();
     stopDoor04Test();
@@ -751,7 +751,7 @@ export function createAudioSystem(fullTrack, callbacks = {}) {
       try { source?.disconnect(); } catch { /* no-op */ }
       if (door04ReferenceSource !== source) return;
       door04ReferenceSource = null;
-      door04ReferenceOffset = 0;
+      door04ReferenceOffset = buffer.duration;
       try { door04ReferenceGain?.disconnect(); } catch { /* no-op */ }
       door04ReferenceGain = null;
       callbacks.onDoor04PreviewState?.({
@@ -785,6 +785,23 @@ export function createAudioSystem(fullTrack, callbacks = {}) {
   }
 
   function pauseDoor04Reference() { stopDoor04Reference(true); }
+
+  function getDoor04ReferenceProgress() {
+    const duration=buffers.get('door04ReferenceMix')?.duration??0;
+    const position=Math.max(0,Math.min(duration,door04ReferenceOffset+(door04ReferenceSource?Math.max(0,context.currentTime-door04ReferenceStartedAt):0)));
+    return {duration,position,playing:Boolean(door04ReferenceSource)};
+  }
+  function seekDoor04Reference(seconds) {
+    const buffer=buffers.get('door04ReferenceMix');
+    if(!buffer||!Number.isFinite(seconds)||door04Sequence)return false;
+    const playing=Boolean(door04ReferenceSource),entityId='door04-reference-console';
+    pauseDoor04Reference();
+    // Seeking is navigation, never a synthetic playback-completion event.
+    door04ReferenceOffset=Math.max(0,Math.min(buffer.duration,seconds));
+    if(playing){door04ReferenceOffset=Math.min(door04ReferenceOffset,Math.max(0,buffer.duration-.02));return playDoor04Reference(entityId);}
+    return true;
+  }
+
 
   function playDoor04Voice(audioKey, entityId, maxDuration = 15) {
     if(door04Sequence)return false;
@@ -1503,7 +1520,7 @@ export function createAudioSystem(fullTrack, callbacks = {}) {
     startSuccessLoops, stopSuccessLoops, stopPreview, stopAll,
     playDoor03StageLoop, stopDoor03Loop, getDoor03LoopDiagnostics,
     playDoor03Success, stopDoor03Success, getDoor03SuccessLevel,
-    playDoor04Reference, pauseDoor04Reference, playDoor04Voice, startDoor04Test,
+    playDoor04Reference, pauseDoor04Reference, seekDoor04Reference, getDoor04ReferenceProgress, playDoor04Voice, startDoor04Test,
     stopDoor04Test, getDoor04TestProgress, playDoor04Success, stopDoor04Success,
     stopDoor04Audio, getDoor04StemLevels,
     playDoor05Reference, stopDoor05Reference, getDoor05ReferenceTime,
